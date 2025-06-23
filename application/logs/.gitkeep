@@ -1,0 +1,9 @@
+# TrackTraster - Log Files
+# This directory stores application logs
+
+# Don't commit log files to version control
+*.log
+*.txt
+
+# But keep the directory
+!.gitkeep

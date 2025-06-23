@@ -1,0 +1,13 @@
+# TrackTraster - Uploads Directory
+# This directory stores uploaded files like artist images, reports, etc.
+
+# Don't commit uploads to version control
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.pdf
+*.csv
+
+# But keep the directory
+!.gitkeep

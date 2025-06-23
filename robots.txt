@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /application/
+Disallow: /database/
+Disallow: /assets/
+Allow: /
+
+# TrackTraster - Music Analytics Platform
+# Contact: admin@tracktraster.com
