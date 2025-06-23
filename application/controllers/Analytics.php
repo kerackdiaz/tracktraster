@@ -4,11 +4,14 @@
  */
 
 class Analytics extends BaseController
-{
-    public function __construct($config)
+{    public function __construct($config)
     {
         parent::__construct($config);
         $this->requireAuth();
+        
+        // Initialize analytics service
+        require_once APPPATH . 'services/AnalyticsService.php';
+        $this->analyticsService = new AnalyticsService($this->db, $config);
     }
 
     public function index()
@@ -43,10 +46,15 @@ class Analytics extends BaseController
                      JOIN artist_trackings at ON a.id = at.artist_id 
                      WHERE a.id = ? AND at.user_id = ? AND at.status = 'active'",
                     [$artistId, $user['id']]
-                );
-
-                if ($selectedArtist) {
-                    $analytics = $this->generateMockAnalytics($selectedArtist);
+                );                if ($selectedArtist) {
+                    // Get real analytics data
+                    try {
+                        $analytics = $this->analyticsService->getArtistAnalytics($artistId, $user['id']);
+                    } catch (Exception $e) {
+                        // Fallback to basic data if analytics fail
+                        $analytics = $this->generateBasicAnalytics($selectedArtist);
+                        error_log("Analytics error: " . $e->getMessage());
+                    }
                 }
             } catch (Exception $e) {
                 $selectedArtist = null;
@@ -65,66 +73,83 @@ class Analytics extends BaseController
         ];
 
         $this->loadView('analytics/index', $data);
-    }
-
-    private function generateMockAnalytics($artist)
+    }    private function generateBasicAnalytics($artist)
     {
-        // Generate mock analytics data for demonstration
-        // In a real implementation, this would fetch actual data from APIs
-        
+        // Generate basic analytics when no historical data exists
         $startDate = strtotime($artist['tracking_start_date']);
         $days = floor((time() - $startDate) / (60 * 60 * 24));
         
         return [
             'summary' => [
-                'total_streams' => rand(100000, 5000000),
-                'followers_growth' => rand(-5, 50),
-                'chart_position' => rand(1, 100),
-                'social_mentions' => rand(50, 1000),
-                'tracking_days' => $days
+                'total_followers' => 0,
+                'followers_growth' => 0,
+                'current_popularity' => 0,
+                'monthly_listeners' => 0,
+                'tracking_days' => $days,
+                'platforms_count' => 0
             ],
             'trends' => [
-                'streams_trend' => rand(-10, 30),
-                'followers_trend' => rand(-5, 25),
-                'popularity_trend' => rand(-3, 15),
-                'engagement_trend' => rand(-8, 20)
+                'followers_trend' => 0,
+                'popularity_trend' => 0,
+                'listeners_trend' => 0,
+                'engagement_trend' => 0
             ],
             'charts' => [
-                'daily_streams' => $this->generateMockChartData($days, 10000, 50000),
-                'followers_growth' => $this->generateMockChartData($days, -100, 500),
-                'popularity_score' => $this->generateMockChartData($days, 30, 90)
+                'followers_growth' => [],
+                'popularity_score' => [],
+                'listeners_growth' => []
             ],
             'regional_data' => [
-                'top_cities' => [
-                    ['name' => 'Buenos Aires', 'streams' => rand(10000, 100000)],
-                    ['name' => 'Ciudad de México', 'streams' => rand(8000, 80000)],
-                    ['name' => 'São Paulo', 'streams' => rand(12000, 120000)],
-                    ['name' => 'Bogotá', 'streams' => rand(6000, 60000)],
-                    ['name' => 'Lima', 'streams' => rand(4000, 40000)]
-                ]
-            ]
+                'top_cities' => [],
+                'country_focus' => $artist['country_code']
+            ],
+            'platforms' => [
+                'spotify' => null,
+                'deezer' => null,
+                'lastfm' => null,
+                'total_followers' => 0,
+                'avg_popularity' => 0
+            ],
+            'tracking_info' => $artist,
+            'message' => 'Recopilando datos iniciales. Las métricas aparecerán una vez que se recolecten datos de las APIs.'
         ];
+    }    /**
+     * Crear un cron job o tarea programada para actualizar métricas diarias
+     */
+    public function updateDailyMetrics()
+    {
+        // Solo accesible desde cron o admin
+        if (!$this->isValidCronRequest()) {
+            http_response_code(403);
+            die('Access denied');
+        }
+
+        $trackings = $this->db->fetchAll(
+            "SELECT id FROM artist_trackings WHERE status = 'active'"
+        );
+
+        $updated = 0;
+        foreach ($trackings as $tracking) {
+            try {
+                if ($this->analyticsService->saveDailyMetrics($tracking['id'])) {
+                    $updated++;
+                }
+            } catch (Exception $e) {
+                error_log("Error updating metrics for tracking {$tracking['id']}: " . $e->getMessage());
+            }
+        }
+
+        echo "Updated metrics for $updated trackings\n";
     }
 
-    private function generateMockChartData($days, $min, $max)
+    private function isValidCronRequest()
     {
-        $data = [];
-        $baseValue = rand($min, $max);
+        // Check if request is from localhost/cron or has valid key
+        $validKey = $this->config['app']['cron_key'] ?? 'tracktraster_cron_2025';
+        $providedKey = $_GET['key'] ?? '';
         
-        for ($i = max(0, $days - 30); $i <= $days; $i++) {
-            $date = date('Y-m-d', strtotime("-$i days"));
-            $variance = rand(-($max - $min) * 0.1, ($max - $min) * 0.1);
-            $value = max($min, min($max, $baseValue + $variance));
-            
-            $data[] = [
-                'date' => $date,
-                'value' => $value
-            ];
-            
-            $baseValue = $value;
-        }
-        
-        return array_reverse($data);
+        return $providedKey === $validKey || 
+               in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1']);
     }
 
     public function export()
@@ -150,10 +175,8 @@ class Analytics extends BaseController
             if (!$artist) {
                 $this->session->setFlash('error', 'Artista no encontrado');
                 $this->redirect('analytics');
-            }
-
-            // Generate CSV export
-            $analytics = $this->generateMockAnalytics($artist);
+            }            // Generate CSV export with real data
+            $analytics = $this->analyticsService->getArtistAnalytics($artistId, $user['id']);
             $filename = 'analytics_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $artist['name']) . '_' . date('Y-m-d') . '.csv';
             
             header('Content-Type: text/csv');
@@ -162,19 +185,21 @@ class Analytics extends BaseController
             $output = fopen('php://output', 'w');
             
             // Headers
-            fputcsv($output, ['Fecha', 'Streams Diarios', 'Crecimiento Seguidores', 'Score Popularidad']);
+            fputcsv($output, ['Fecha', 'Seguidores Spotify', 'Popularidad Spotify', 'Listeners Last.fm']);
             
-            // Data
-            $streamData = $analytics['charts']['daily_streams'];
+            // Data from charts
             $followerData = $analytics['charts']['followers_growth'];
             $popularityData = $analytics['charts']['popularity_score'];
+            $listenersData = $analytics['charts']['listeners_growth'];
             
-            for ($i = 0; $i < count($streamData); $i++) {
+            $maxRows = max(count($followerData), count($popularityData), count($listenersData));
+            
+            for ($i = 0; $i < $maxRows; $i++) {
                 fputcsv($output, [
-                    $streamData[$i]['date'],
-                    $streamData[$i]['value'],
+                    $followerData[$i]['date'] ?? '',
                     $followerData[$i]['value'] ?? 0,
-                    $popularityData[$i]['value'] ?? 0
+                    $popularityData[$i]['value'] ?? 0,
+                    $listenersData[$i]['value'] ?? 0
                 ]);
             }
             

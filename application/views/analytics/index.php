@@ -92,9 +92,16 @@
             </div>
         </div>
         <?php else: ?>
-        
-        <!-- Dashboard de analíticas -->
+          <!-- Dashboard de analíticas -->
         <div class="analytics-dashboard">
+            
+            <?php if (isset($analytics['message'])): ?>
+            <!-- Mensaje informativo -->
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <?= htmlspecialchars($analytics['message']) ?>
+            </div>
+            <?php endif; ?>
             
             <!-- Métricas principales -->
             <div class="row mb-4">
@@ -102,13 +109,12 @@
                     <div class="metric-card">
                         <div class="metric-icon streams">
                             <i class="fas fa-play"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3 class="metric-value"><?= number_format($analytics['summary']['total_streams']) ?></h3>
-                            <p class="metric-label">Streams Totales</p>
-                            <div class="metric-trend <?= $analytics['trends']['streams_trend'] >= 0 ? 'positive' : 'negative' ?>">
-                                <i class="fas fa-arrow-<?= $analytics['trends']['streams_trend'] >= 0 ? 'up' : 'down' ?>"></i>
-                                <?= abs($analytics['trends']['streams_trend']) ?>% vs semana anterior
+                        </div>                        <div class="metric-content">
+                            <h3 class="metric-value"><?= number_format($analytics['summary']['total_followers']) ?></h3>
+                            <p class="metric-label">Seguidores Totales</p>
+                            <div class="metric-trend <?= $analytics['trends']['followers_trend'] >= 0 ? 'positive' : 'negative' ?>">
+                                <i class="fas fa-arrow-<?= $analytics['trends']['followers_trend'] >= 0 ? 'up' : 'down' ?>"></i>
+                                <?= abs(round($analytics['trends']['followers_trend'], 1)) ?>% vs semana anterior
                             </div>
                         </div>
                     </div>
@@ -118,13 +124,12 @@
                     <div class="metric-card">
                         <div class="metric-icon followers">
                             <i class="fas fa-users"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3 class="metric-value">+<?= number_format($analytics['summary']['followers_growth']) ?></h3>
-                            <p class="metric-label">Nuevos Seguidores</p>
-                            <div class="metric-trend <?= $analytics['trends']['followers_trend'] >= 0 ? 'positive' : 'negative' ?>">
-                                <i class="fas fa-arrow-<?= $analytics['trends']['followers_trend'] >= 0 ? 'up' : 'down' ?>"></i>
-                                <?= abs($analytics['trends']['followers_trend']) ?>% crecimiento
+                        </div>                        <div class="metric-content">
+                            <h3 class="metric-value"><?= $analytics['summary']['monthly_listeners'] > 0 ? number_format($analytics['summary']['monthly_listeners']) : 'N/A' ?></h3>
+                            <p class="metric-label">Oyentes Mensuales</p>
+                            <div class="metric-trend <?= $analytics['trends']['listeners_trend'] >= 0 ? 'positive' : 'negative' ?>">
+                                <i class="fas fa-arrow-<?= $analytics['trends']['listeners_trend'] >= 0 ? 'up' : 'down' ?>"></i>
+                                <?= abs(round($analytics['trends']['listeners_trend'], 1)) ?>% crecimiento
                             </div>
                         </div>
                     </div>
@@ -134,13 +139,12 @@
                     <div class="metric-card">
                         <div class="metric-icon charts">
                             <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3 class="metric-value">#<?= $analytics['summary']['chart_position'] ?></h3>
-                            <p class="metric-label">Posición Charts</p>
+                        </div>                        <div class="metric-content">
+                            <h3 class="metric-value"><?= $analytics['summary']['current_popularity'] ?>%</h3>
+                            <p class="metric-label">Popularidad Actual</p>
                             <div class="metric-trend <?= $analytics['trends']['popularity_trend'] >= 0 ? 'positive' : 'negative' ?>">
                                 <i class="fas fa-arrow-<?= $analytics['trends']['popularity_trend'] >= 0 ? 'up' : 'down' ?>"></i>
-                                <?= abs($analytics['trends']['popularity_trend']) ?> posiciones
+                                <?= abs(round($analytics['trends']['popularity_trend'], 1)) ?>% cambio
                             </div>
                         </div>
                     </div>
@@ -150,13 +154,12 @@
                     <div class="metric-card">
                         <div class="metric-icon social">
                             <i class="fas fa-hashtag"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3 class="metric-value"><?= number_format($analytics['summary']['social_mentions']) ?></h3>
-                            <p class="metric-label">Menciones Sociales</p>
-                            <div class="metric-trend <?= $analytics['trends']['engagement_trend'] >= 0 ? 'positive' : 'negative' ?>">
-                                <i class="fas fa-arrow-<?= $analytics['trends']['engagement_trend'] >= 0 ? 'up' : 'down' ?>"></i>
-                                <?= abs($analytics['trends']['engagement_trend']) ?>% engagement
+                        </div>                        <div class="metric-content">
+                            <h3 class="metric-value"><?= $analytics['summary']['platforms_count'] ?></h3>
+                            <p class="metric-label">Plataformas Activas</p>
+                            <div class="metric-trend">
+                                <i class="fas fa-music"></i>
+                                Spotify, Deezer, Last.fm
                             </div>
                         </div>
                     </div>
@@ -166,15 +169,14 @@
             <!-- Gráficos -->
             <div class="row mb-4">
                 <div class="col-lg-8">
-                    <div class="card chart-card">
-                        <div class="card-header">
+                    <div class="card chart-card">                        <div class="card-header">
                             <h5 class="mb-0">
                                 <i class="fas fa-chart-line text-primary"></i>
-                                Streams Diarios (Últimos 30 días)
+                                Crecimiento de Seguidores (Últimos 30 días)
                             </h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="streamsChart" height="300"></canvas>
+                            <canvas id="followersChart" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -214,15 +216,14 @@
             <!-- Métricas adicionales -->
             <div class="row">
                 <div class="col-lg-6">
-                    <div class="card chart-card">
-                        <div class="card-header">
+                    <div class="card chart-card">                        <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-user-plus text-info"></i>
-                                Crecimiento de Seguidores
+                                <i class="fas fa-headphones text-info"></i>
+                                Oyentes Last.fm
                             </h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="followersChart" height="200"></canvas>
+                            <canvas id="listenersChart" height="200"></canvas>
                         </div>
                     </div>
                 </div>
@@ -444,10 +445,10 @@ function changeArtist() {
 }
 
 <?php if ($selected_artist && $analytics): ?>
-// Datos para los gráficos
-const streamsData = <?= json_encode($analytics['charts']['daily_streams']) ?>;
+// Datos reales para los gráficos
 const followersData = <?= json_encode($analytics['charts']['followers_growth']) ?>;
 const popularityData = <?= json_encode($analytics['charts']['popularity_score']) ?>;
+const listenersData = <?= json_encode($analytics['charts']['listeners_growth']) ?>;
 
 // Configuración común de gráficos
 const commonOptions = {
@@ -472,19 +473,19 @@ const commonOptions = {
     }
 };
 
-// Gráfico de Streams
-const streamsCtx = document.getElementById('streamsChart').getContext('2d');
-new Chart(streamsCtx, {
+// Gráfico de Seguidores (principal)
+const followersCtx = document.getElementById('followersChart').getContext('2d');
+new Chart(followersCtx, {
     type: 'line',
     data: {
-        labels: streamsData.map(item => {
+        labels: followersData.map(item => {
             const date = new Date(item.date);
             return date.getDate() + '/' + (date.getMonth() + 1);
         }),
         datasets: [{
-            data: streamsData.map(item => item.value),
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            data: followersData.map(item => item.value),
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
             borderWidth: 3,
             fill: true,
             tension: 0.4
@@ -493,18 +494,18 @@ new Chart(streamsCtx, {
     options: commonOptions
 });
 
-// Gráfico de Seguidores
-const followersCtx = document.getElementById('followersChart').getContext('2d');
-new Chart(followersCtx, {
+// Gráfico de Oyentes (Last.fm)
+const listenersCtx = document.getElementById('listenersChart').getContext('2d');
+new Chart(listenersCtx, {
     type: 'bar',
     data: {
-        labels: followersData.map(item => {
+        labels: listenersData.map(item => {
             const date = new Date(item.date);
             return date.getDate() + '/' + (date.getMonth() + 1);
         }),
         datasets: [{
-            data: followersData.map(item => item.value),
-            backgroundColor: '#28a745',
+            data: listenersData.map(item => item.value),
+            backgroundColor: '#667eea',
             borderRadius: 4
         }]
     },
