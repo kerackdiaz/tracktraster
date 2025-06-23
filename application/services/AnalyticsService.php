@@ -7,24 +7,15 @@
 class AnalyticsService
 {
     private $db;
-    private $spotifyService;
-    private $deezerService;
-    private $lastfmService;
-    private $config;
-
-    public function __construct($db, $config)
+    private $platformManager;
+    private $config;public function __construct($db, $config)
     {
         $this->db = $db;
         $this->config = $config;
         
-        // Initialize API services
-        require_once APPPATH . 'libraries/SpotifyService.php';
-        require_once APPPATH . 'libraries/DeezerService.php';
-        require_once APPPATH . 'libraries/LastfmService.php';
-        
-        $this->spotifyService = new SpotifyService($config);
-        $this->deezerService = new DeezerService($config);
-        $this->lastfmService = new LastfmService($config);
+        // Initialize existing Music Platform Manager
+        require_once APPPATH . 'libraries/MusicPlatformManager.php';
+        $this->platformManager = new MusicPlatformManager($config);
     }
 
     /**
@@ -63,9 +54,7 @@ class AnalyticsService
             'platforms' => $currentMetrics,
             'tracking_info' => $tracking
         ];
-    }
-
-    /**
+    }    /**
      * Obtener métricas actuales de todas las plataformas
      */
     private function getCurrentMetrics($tracking)
@@ -78,51 +67,48 @@ class AnalyticsService
             'avg_popularity' => 0
         ];
 
-        // Spotify
-        if ($tracking['spotify_id'] && $this->config['spotify']['enabled']) {
-            try {
-                $spotifyData = $this->spotifyService->getArtistDetails($tracking['spotify_id']);
-                if ($spotifyData['status'] === 'found') {
+        try {
+            // Usar el MusicPlatformManager existente para obtener datos
+            $platformData = $this->platformManager->searchArtistAllPlatforms($tracking['artist_name']);
+            
+            if (isset($platformData['platforms_data'])) {
+                // Spotify
+                if (isset($platformData['platforms_data']['spotify']) && 
+                    $platformData['platforms_data']['spotify']['status'] === 'found') {
+                    
+                    $spotifyData = $platformData['platforms_data']['spotify'];
                     $metrics['spotify'] = [
-                        'followers' => $spotifyData['followers'],
-                        'popularity' => $spotifyData['popularity'],
-                        'monthly_listeners' => $spotifyData['monthly_listeners'] ?? 0
+                        'followers' => $spotifyData['followers'] ?? 0,
+                        'popularity' => $spotifyData['popularity'] ?? 0,
+                        'monthly_listeners' => 0 // No disponible en búsqueda básica
                     ];
-                    $metrics['total_followers'] += $spotifyData['followers'];
+                    $metrics['total_followers'] += $spotifyData['followers'] ?? 0;
                 }
-            } catch (Exception $e) {
-                error_log("Error getting Spotify data: " . $e->getMessage());
-            }
-        }
 
-        // Deezer
-        if ($this->config['deezer']['enabled']) {
-            try {
-                $deezerData = $this->deezerService->searchArtist($tracking['artist_name']);
-                if ($deezerData['status'] === 'found') {
+                // Deezer
+                if (isset($platformData['platforms_data']['deezer']) && 
+                    $platformData['platforms_data']['deezer']['status'] === 'found') {
+                    
+                    $deezerData = $platformData['platforms_data']['deezer'];
                     $metrics['deezer'] = [
                         'fans' => $deezerData['fans'] ?? 0
                     ];
                     $metrics['total_followers'] += $deezerData['fans'] ?? 0;
                 }
-            } catch (Exception $e) {
-                error_log("Error getting Deezer data: " . $e->getMessage());
-            }
-        }
 
-        // Last.fm
-        if ($tracking['lastfm_name'] && $this->config['lastfm']['enabled']) {
-            try {
-                $lastfmData = $this->lastfmService->getArtistInfo($tracking['lastfm_name']);
-                if ($lastfmData['status'] === 'found') {
+                // Last.fm
+                if (isset($platformData['platforms_data']['lastfm']) && 
+                    $platformData['platforms_data']['lastfm']['status'] === 'found') {
+                    
+                    $lastfmData = $platformData['platforms_data']['lastfm'];
                     $metrics['lastfm'] = [
                         'listeners' => $lastfmData['listeners'] ?? 0,
                         'playcount' => $lastfmData['playcount'] ?? 0
                     ];
                 }
-            } catch (Exception $e) {
-                error_log("Error getting Last.fm data: " . $e->getMessage());
             }
+        } catch (Exception $e) {
+            error_log("Error getting platform metrics: " . $e->getMessage());
         }
 
         // Calcular popularidad promedio
