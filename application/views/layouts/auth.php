@@ -7,11 +7,10 @@
     
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="<?= $base_url ?? '/tracktraster/' ?>assets/css/style.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">    <link href="<?= $base_url ?? '/' ?>assets/css/style.css" rel="stylesheet">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="<?= $base_url ?? '/tracktraster/' ?>assets/img/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="<?= $base_url ?? '/' ?>assets/img/favicon.ico">
 </head>
 <body class="auth-body">
     
@@ -23,7 +22,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?= $base_url ?? '/tracktraster/' ?>assets/js/app.js"></script>
+    <script src="<?= $base_url ?? '/' ?>assets/js/app.js"></script>
     
     <?php if (isset($scripts)) echo $scripts; ?>
     

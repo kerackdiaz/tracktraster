@@ -34,5 +34,5 @@ try {
     echo '<p><strong>Archivo:</strong> ' . $e->getFile() . ' (línea ' . $e->getLine() . ')</p>';
     echo '<pre>' . $e->getTraceAsString() . '</pre>';
     echo '<hr>';
-    echo '<p><a href="/tracktraster/debug.php">Ver Debug completo</a></p>';
+    echo '<p><a href="/debug.php">Ver Debug completo</a></p>';
 }
