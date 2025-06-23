@@ -3,7 +3,7 @@
 <div class="content-header">
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0"><?= htmlspecialchars($page_title) ?></h1>
-        <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-primary">
+        <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-primary">
             <i class="fas fa-search"></i> Buscar Artista
         </a>
     </div>
@@ -22,7 +22,7 @@
                     No tienes artistas en seguimiento. Busca y agrega artistas para comenzar a analizar 
                     su crecimiento en países de LATAM.
                 </p>
-                <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-primary btn-lg">
+                <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-primary btn-lg">
                     <i class="fas fa-search"></i> Buscar Primer Artista
                 </a>
             </div>
@@ -191,15 +191,15 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/view/<?= $artist['id'] ?>" 
+                                        <a href="<?= ($base_url ?? '/') ?>artists/view/<?= $artist['id'] ?>" 
                                            class="btn btn-outline-primary" title="Ver detalles">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="<?= ($base_url ?? '/tracktraster/') ?>analytics?artist_id=<?= $artist['id'] ?>" 
+                                        <a href="<?= ($base_url ?? '/') ?>analytics?artist_id=<?= $artist['id'] ?>" 
                                            class="btn btn-outline-success" title="Ver analíticas">
                                             <i class="fas fa-chart-bar"></i>
                                         </a>
-                                        <a href="<?= ($base_url ?? '/tracktraster/') ?>trackings/edit/<?= $artist['id'] ?>" 
+                                        <a href="<?= ($base_url ?? '/') ?>trackings/edit/<?= $artist['id'] ?>" 
                                            class="btn btn-outline-warning" title="Editar seguimiento">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -267,6 +267,6 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

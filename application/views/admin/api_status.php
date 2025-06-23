@@ -7,7 +7,7 @@
             <button id="refreshTests" class="btn btn-outline-primary">
                 <i class="fas fa-sync-alt"></i> Refrescar Pruebas
             </button>
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>admin" class="btn btn-secondary">
+            <a href="<?= ($base_url ?? '/') ?>admin" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
         </div>
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
         
         // Hacer petición AJAX para refrescar pruebas
-        fetch('<?= ($base_url ?? '/tracktraster/') ?>admin/refresh_tests', {
+        fetch('<?= ($base_url ?? '/') ?>admin/refresh_tests', {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -557,6 +557,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

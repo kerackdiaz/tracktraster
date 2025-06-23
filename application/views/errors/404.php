@@ -24,7 +24,7 @@
             </div>
             
             <div style="margin: 30px 0;">
-                <a href="/tracktraster/" class="btn btn-primary btn-auth" style="width: auto; display: inline-flex;">
+                <a href="/" class="btn btn-primary btn-auth" style="width: auto; display: inline-flex;">
                     <i class="fas fa-home"></i> Volver al inicio
                 </a>
             </div>

@@ -135,7 +135,7 @@
             </form>
 
             <div class="auth-links">
-                <p>¿Ya tienes cuenta? <a href="<?= $base_url ?? '/tracktraster/' ?>auth/login">Inicia sesión aquí</a></p>
+                <p>¿Ya tienes cuenta? <a href="<?= $base_url ?? '/' ?>auth/login">Inicia sesión aquí</a></p>
             </div>
         </div>
 
@@ -147,7 +147,7 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/auth.php';
 ?>
 

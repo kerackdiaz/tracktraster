@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0"><?= htmlspecialchars($page_title) ?></h1>
         <div>
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>admin" class="btn btn-secondary">
+            <a href="<?= ($base_url ?? '/') ?>admin" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
         </div>
@@ -154,7 +154,7 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-outline-primary btn-sm">
+                    <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-server"></i> Ver Estado de APIs
                     </a>
                     <button onclick="location.reload()" class="btn btn-outline-info btn-sm">
@@ -257,6 +257,6 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

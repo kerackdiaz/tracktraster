@@ -27,7 +27,7 @@
                 </ul>
             </div>
             <div class="card-footer">
-                <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-info">
+                <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-info">
                     <i class="fas fa-server"></i> Ver Estado
                 </a>
             </div>
@@ -51,7 +51,7 @@
                     </p>
                 </div>
             </div>
-            <div class="card-footer">                <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/system_info" class="btn btn-warning">
+            <div class="card-footer">                <a href="<?= ($base_url ?? '/') ?>admin/system_info" class="btn btn-warning">
                     <i class="fas fa-info-circle"></i> Ver Información
                 </a>
             </div>
@@ -108,7 +108,7 @@
                                 Las credenciales se configuran directamente en el archivo <code>.env</code> por seguridad.
                             </p>
                             <p class="mb-0">
-                                <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-sm btn-primary">
+                                <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-sm btn-primary">
                                     <i class="fas fa-server"></i> Ver Estado Detallado
                                 </a>
                             </p>
@@ -143,7 +143,7 @@
                                     <small class="text-muted">Hace 5 min</small>
                                 </td>
                                 <td>
-                                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
+                                    <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> Detalles
                                     </a>
                                 </td>
@@ -163,7 +163,7 @@
                                     <small class="text-muted">Hace 5 min</small>
                                 </td>
                                 <td>
-                                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
+                                    <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> Detalles
                                     </a>
                                 </td>
@@ -183,7 +183,7 @@
                                     <small class="text-muted">Hace 5 min</small>
                                 </td>
                                 <td>
-                                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
+                                    <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> Detalles
                                     </a>
                                 </td>
@@ -203,7 +203,7 @@
                                     <small class="text-muted">Hace 5 min</small>
                                 </td>
                                 <td>
-                                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
+                                    <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> Detalles
                                     </a>
                                 </td>
@@ -251,10 +251,10 @@
                 </h6>
             </div>            <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/api_status" class="btn btn-outline-primary">
+                    <a href="<?= ($base_url ?? '/') ?>admin/api_status" class="btn btn-outline-primary">
                         <i class="fas fa-server"></i> Ver Estado de APIs
                     </a>
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>admin/system_info" class="btn btn-outline-info">
+                    <a href="<?= ($base_url ?? '/') ?>admin/system_info" class="btn btn-outline-info">
                         <i class="fas fa-info-circle"></i> Información del Sistema
                     </a>
                     <button class="btn btn-outline-success" onclick="location.reload()">
@@ -306,6 +306,6 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

@@ -173,7 +173,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="<?= ($base_url ?? '/tracktraster/') ?>dashboard" class="btn btn-secondary">
+                        <a href="<?= ($base_url ?? '/') ?>dashboard" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver al Dashboard
                         </a>
                         <button type="submit" class="btn btn-primary" id="updateBtn">
@@ -249,7 +249,7 @@
                 <h5 class="modal-title">Cambiar Contraseña</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="<?= ($base_url ?? '/tracktraster/') ?>dashboard/change-password" id="passwordForm">
+            <form method="POST" action="<?= ($base_url ?? '/') ?>dashboard/change-password" id="passwordForm">
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     
@@ -499,6 +499,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

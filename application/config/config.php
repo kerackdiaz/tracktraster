@@ -25,7 +25,7 @@ $config['database'] = array (
  * Application Configuration
  */
 $config['app'] = array (
-  'base_url' => EnvLoader::get('APP_BASE_URL', 'http://localhost/tracktraster/'),
+  'base_url' => EnvLoader::get('APP_BASE_URL', 'https://tracktraster.3mas1r.com/'),
   'index_page' => EnvLoader::get('APP_INDEX_PAGE', ''),
   'session_expiration' => EnvLoader::get('APP_SESSION_EXPIRATION', 7200),
   'remember_me_expiration' => EnvLoader::get('APP_REMEMBER_ME_EXPIRATION', 2592000),
@@ -41,7 +41,7 @@ $config['app'] = array (
 $config['spotify'] = array (
   'client_id' => EnvLoader::get('SPOTIFY_CLIENT_ID', ''),
   'client_secret' => EnvLoader::get('SPOTIFY_CLIENT_SECRET', ''),
-  'redirect_uri' => EnvLoader::get('SPOTIFY_REDIRECT_URI', 'http://localhost/tracktraster/auth/spotify/callback'),
+  'redirect_uri' => EnvLoader::get('SPOTIFY_REDIRECT_URI', 'https://tracktraster.3mas1r.com/auth/spotify/callback'),
   'enabled' => EnvLoader::get('SPOTIFY_ENABLED', false),
 );
 

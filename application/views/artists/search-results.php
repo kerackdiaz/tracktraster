@@ -26,7 +26,7 @@
                 <?php endif; ?>
             </p>
         </div>
-        <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-outline-light">
+        <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-outline-light">
             <i class="fas fa-search"></i> Nueva Búsqueda
         </a>
     </div>
@@ -90,7 +90,7 @@
                 </div>
                 <?php endif; ?>
                 
-                <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-primary mt-3">
+                <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-primary mt-3">
                     <i class="fas fa-search"></i> Realizar Nueva Búsqueda
                 </a>
             </div>
@@ -216,7 +216,7 @@
                     </div>
                     
                     <div class="card-footer">
-                        <form method="POST" action="<?= ($base_url ?? '/tracktraster/') ?>artists/add" class="d-inline">
+                        <form method="POST" action="<?= ($base_url ?? '/') ?>artists/add" class="d-inline">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                             <input type="hidden" name="artist_name" value="<?= htmlspecialchars($artist['name']) ?>">
                             <input type="hidden" name="platforms_data" value="<?= htmlspecialchars(json_encode($artist['platforms'])) ?>">
@@ -325,6 +325,6 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

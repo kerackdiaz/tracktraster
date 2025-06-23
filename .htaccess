@@ -112,9 +112,9 @@ RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </IfModule>
 
 # Custom error pages
-ErrorDocument 404 /tracktraster/index.php?url=error/404
-ErrorDocument 403 /tracktraster/index.php?url=error/403
-ErrorDocument 500 /tracktraster/index.php?url=error/500
+ErrorDocument 404 /index.php?url=error/404
+ErrorDocument 403 /index.php?url=error/403
+ErrorDocument 500 /index.php?url=error/500
 
 # Additional security
 <IfModule mod_rewrite.c>

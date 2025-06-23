@@ -23,14 +23,14 @@
                 </p>
             </div>
         </div>        <div class="header-actions">
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>artists" class="btn btn-outline-light me-2">
+            <a href="<?= ($base_url ?? '/') ?>artists" class="btn btn-outline-light me-2">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
             <button class="btn btn-outline-light me-2" onclick="refreshMetrics()" id="refreshBtn">
                 <i class="fas fa-sync-alt"></i> Actualizar Métricas
             </button>
             <?php if ($artist['status']): ?>
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>analytics?artist_id=<?= $artist['id'] ?>" class="btn btn-success">
+            <a href="<?= ($base_url ?? '/') ?>analytics?artist_id=<?= $artist['id'] ?>" class="btn btn-success">
                 <i class="fas fa-chart-bar"></i> Ver Analíticas
             </a>
             <?php endif; ?>
@@ -280,13 +280,13 @@
                 <?php endif; ?>
                 
                 <div class="tracking-actions mt-4">
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>trackings/edit/<?= $artist['id'] ?>" class="btn btn-primary">
+                    <a href="<?= ($base_url ?? '/') ?>trackings/edit/<?= $artist['id'] ?>" class="btn btn-primary">
                         <i class="fas fa-edit"></i> Editar Seguimiento
                     </a>
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>analytics?artist_id=<?= $artist['id'] ?>" class="btn btn-success">
+                    <a href="<?= ($base_url ?? '/') ?>analytics?artist_id=<?= $artist['id'] ?>" class="btn btn-success">
                         <i class="fas fa-chart-bar"></i> Ver Analíticas
                     </a>
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>reports/artist/<?= $artist['id'] ?>" class="btn btn-info">
+                    <a href="<?= ($base_url ?? '/') ?>reports/artist/<?= $artist['id'] ?>" class="btn btn-info">
                         <i class="fas fa-file-alt"></i> Generar Reporte
                     </a>
                 </div>
@@ -303,7 +303,7 @@
                     Este artista no tiene un seguimiento configurado. 
                     <br>Configura un seguimiento para comenzar a analizar su crecimiento.
                 </p>
-                <a href="<?= ($base_url ?? '/tracktraster/') ?>trackings/create?artist_id=<?= $artist['id'] ?>" class="btn btn-primary btn-lg">
+                <a href="<?= ($base_url ?? '/') ?>trackings/create?artist_id=<?= $artist['id'] ?>" class="btn btn-primary btn-lg">
                     <i class="fas fa-plus"></i> Configurar Seguimiento
                 </a>
             </div>
@@ -559,7 +559,7 @@
                         <i class="fas fa-info-circle"></i>
                         Las métricas detalladas están disponibles en la sección de Analíticas
                     </p>
-                    <a href="<?= ($base_url ?? '/tracktraster/') ?>analytics?artist_id=<?= $artist['id'] ?>" class="btn btn-success">
+                    <a href="<?= ($base_url ?? '/') ?>analytics?artist_id=<?= $artist['id'] ?>" class="btn btn-success">
                         <i class="fas fa-chart-bar"></i> Ver Analíticas Completas
                     </a>
                 </div>
@@ -968,6 +968,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

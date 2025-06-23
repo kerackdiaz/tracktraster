@@ -5,11 +5,11 @@
         <h1 class="h3 mb-0"><?= htmlspecialchars($page_title) ?></h1>
         <?php if ($selected_artist): ?>
         <div class="header-actions">
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>analytics/export?artist_id=<?= $selected_artist['id'] ?>" 
+            <a href="<?= ($base_url ?? '/') ?>analytics/export?artist_id=<?= $selected_artist['id'] ?>" 
                class="btn btn-outline-light me-2">
                 <i class="fas fa-download"></i> Exportar Datos
             </a>
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>reports/artist/<?= $selected_artist['id'] ?>" 
+            <a href="<?= ($base_url ?? '/') ?>reports/artist/<?= $selected_artist['id'] ?>" 
                class="btn btn-success">
                 <i class="fas fa-file-alt"></i> Generar Reporte
             </a>
@@ -40,7 +40,7 @@
                         <?php if (empty($tracked_artists)): ?>
                         <div class="text-center">
                             <p class="text-muted mb-2">No tienes artistas en seguimiento</p>
-                            <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-primary">
+                            <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Agregar Artista
                             </a>
                         </div>
@@ -80,7 +80,7 @@
                     tendencias y métricas en tiempo real.
                 </p>
                 <?php if (empty($tracked_artists)): ?>
-                <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-primary btn-lg">
+                <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-primary btn-lg">
                     <i class="fas fa-search"></i> Buscar Primer Artista
                 </a>
                 <?php else: ?>
@@ -439,7 +439,7 @@
 function changeArtist() {
     const selector = document.getElementById('artistSelector');
     if (selector.value) {
-        window.location.href = '<?= ($base_url ?? '/tracktraster/') ?>analytics?artist_id=' + selector.value;
+        window.location.href = '<?= ($base_url ?? '/') ?>analytics?artist_id=' + selector.value;
     }
 }
 
@@ -536,6 +536,6 @@ new Chart(popularityCtx, {
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

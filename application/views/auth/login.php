@@ -83,7 +83,7 @@
             </form>
 
             <div class="auth-links">
-                <p>¿No tienes cuenta? <a href="<?= $base_url ?? '/tracktraster/' ?>auth/register">Regístrate aquí</a></p>
+                <p>¿No tienes cuenta? <a href="<?= $base_url ?? '/' ?>auth/register">Regístrate aquí</a></p>
             </div>
         </div>
 
@@ -95,6 +95,6 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/auth.php';
 ?>

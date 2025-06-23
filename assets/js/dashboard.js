@@ -83,7 +83,7 @@ function updateActiveMenuItem() {
     
     menuItems.forEach(item => {
         const href = item.getAttribute('href');
-        if (href && currentPath.includes(href.replace(/^.*\/tracktraster/, ''))) {
+        if (href && currentPath.includes(href.replace(/^.*\//, ''))) {
             item.classList.add('active');
         }
     });

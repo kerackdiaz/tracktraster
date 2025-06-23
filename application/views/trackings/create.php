@@ -3,7 +3,7 @@
 <div class="content-header">
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0"><?= htmlspecialchars($page_title) ?></h1>
-        <a href="<?= ($base_url ?? '/tracktraster/') ?>trackings" class="btn btn-outline-light">
+        <a href="<?= ($base_url ?? '/') ?>trackings" class="btn btn-outline-light">
             <i class="fas fa-arrow-left"></i> Volver a Seguimientos
         </a>
     </div>
@@ -85,7 +85,7 @@
                         <div class="artist-selector">
                             <p class="text-muted">
                                 <i class="fas fa-info-circle"></i>
-                                Primero debe <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search">buscar y agregar un artista</a> antes de crear un seguimiento.
+                                Primero debe <a href="<?= ($base_url ?? '/') ?>artists/search">buscar y agregar un artista</a> antes de crear un seguimiento.
                             </p>
                         </div>
                     </div>
@@ -211,7 +211,7 @@
 
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-between">
-                        <a href="<?= ($base_url ?? '/tracktraster/') ?><?= $artist ? 'artists/view/' . $artist['id'] : 'trackings' ?>" 
+                        <a href="<?= ($base_url ?? '/') ?><?= $artist ? 'artists/view/' . $artist['id'] : 'trackings' ?>" 
                            class="btn btn-secondary">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
@@ -443,6 +443,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

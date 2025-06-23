@@ -3,7 +3,7 @@
 <div class="content-header">
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0"><?= htmlspecialchars($page_title) ?></h1>
-        <a href="<?= ($base_url ?? '/tracktraster/') ?>artists" class="btn btn-outline-light">
+        <a href="<?= ($base_url ?? '/') ?>artists" class="btn btn-outline-light">
             <i class="fas fa-arrow-left"></i> Volver a Artistas
         </a>
     </div>
@@ -659,6 +659,6 @@ function showAlert(type, message) {
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>

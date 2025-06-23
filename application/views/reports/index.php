@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0"><?= htmlspecialchars($page_title) ?></h1>
         <div class="header-actions">
-            <a href="<?= ($base_url ?? '/tracktraster/') ?>analytics" class="btn btn-outline-light">
+            <a href="<?= ($base_url ?? '/') ?>analytics" class="btn btn-outline-light">
                 <i class="fas fa-chart-bar"></i> Ver Analíticas
             </a>
         </div>
@@ -25,7 +25,7 @@
                     No tienes artistas en seguimiento para generar reportes. 
                     <br>Agrega artistas para acceder a reportes detallados de crecimiento y analíticas.
                 </p>
-                <a href="<?= ($base_url ?? '/tracktraster/') ?>artists/search" class="btn btn-primary btn-lg">
+                <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-primary btn-lg">
                     <i class="fas fa-search"></i> Buscar Primer Artista
                 </a>
             </div>
@@ -194,15 +194,15 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="<?= ($base_url ?? '/tracktraster/') ?>reports/artist/<?= $artist['id'] ?>" 
+                                        <a href="<?= ($base_url ?? '/') ?>reports/artist/<?= $artist['id'] ?>" 
                                            class="btn btn-primary" title="Ver reporte">
                                             <i class="fas fa-eye"></i> Ver
                                         </a>
-                                        <a href="<?= ($base_url ?? '/tracktraster/') ?>reports/download/<?= $artist['id'] ?>/csv" 
+                                        <a href="<?= ($base_url ?? '/') ?>reports/download/<?= $artist['id'] ?>/csv" 
                                            class="btn btn-outline-success" title="Descargar CSV">
                                             <i class="fas fa-file-csv"></i>
                                         </a>
-                                        <a href="<?= ($base_url ?? '/tracktraster/') ?>reports/download/<?= $artist['id'] ?>/pdf" 
+                                        <a href="<?= ($base_url ?? '/') ?>reports/download/<?= $artist['id'] ?>/pdf" 
                                            class="btn btn-outline-danger" title="Descargar PDF">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
@@ -379,6 +379,6 @@
 
 <?php 
 $content = ob_get_clean();
-$base_url = '/tracktraster/';
+$base_url = '/';
 include APPPATH . 'views/layouts/dashboard.php';
 ?>
