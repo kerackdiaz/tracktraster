@@ -1,174 +1,162 @@
-# TrackTraster 🎵
+# 🎵 TrackTraster
 
-## Plataforma de Análisis y Seguimiento de Artistas Musicales
+**Plataforma de Análisis y Seguimiento de Artistas Musicales**
 
-TrackTraster es una plataforma web que permite a los usuarios seguir y analizar artistas musicales de múltiples plataformas streaming, con un sistema de administración simplificado y gestión de credenciales mediante variables de entorno.
+TrackTraster es una plataforma web optimizada para el seguimiento y análisis de artistas musicales de múltiples plataformas streaming, con un sistema de administración simplificado y gestión segura de credenciales.
 
-### ✨ Características Principales
+## ✨ Características Principales
 
-- **Multi-plataforma**: Integración con Spotify, Deezer y Last.fm
-- **Seguimiento de artistas**: Permite a los usuarios hacer seguimiento de sus artistas favoritos
-- **Panel de administración**: Monitoreo de APIs y pruebas automáticas de conectividad
-- **Configuración segura**: Credenciales gestionadas via variables de entorno (.env)
-- **Responsive**: Interfaz adaptada para dispositivos móviles y desktop
+- **🎯 Multi-plataforma**: Integración con Spotify, Deezer y Last.fm
+- **📊 Seguimiento de artistas**: Sistema completo de tracking y análisis
+- **🛡️ Panel de administración**: Monitoreo de APIs y pruebas automáticas  
+- **🔒 Configuración segura**: Credenciales gestionadas via variables de entorno
+- **📱 Responsive**: Interfaz adaptada para todos los dispositivos
+- **⚡ Optimizado**: Solo 0.5MB, 67 archivos esenciales
 
-### 🚀 Tecnologías
+## 🚀 Tecnologías
 
-- **Backend**: PHP 7.4+ (Framework personalizado tipo MVC)
+- **Backend**: PHP 7.4+ (Framework MVC personalizado)
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Base de datos**: MySQL/MariaDB
 - **APIs**: Spotify Web API, Deezer API, Last.fm API
-- **Autenticación**: Sistema de sesiones personalizado
+- **Seguridad**: Headers de seguridad, protección de archivos, CSP
 
-### 📋 Requisitos del Servidor
+## 📋 Requisitos
 
-- PHP 7.4 o superior
-- MySQL 5.7+ o MariaDB 10.2+
-- mod_rewrite habilitado
+- PHP 7.4+
+- MySQL 5.7+ / MariaDB 10.2+
+- Apache con mod_rewrite
 - Extensiones PHP: PDO, MySQL, cURL, JSON
 
-### ⚙️ Instalación
+## ⚙️ Instalación Rápida
 
-1. **Subir archivos** al servidor web
-2. **Configurar base de datos**:
-   ```sql
-   CREATE DATABASE tracktraster_db;
-   ```
-3. **Importar** estructura de base de datos (incluida en la instalación)
-4. **Configurar .env**:
-   ```bash
-   cp .env.example .env
-   # Editar .env con tus credenciales
-   ```
-5. **Configurar permisos**:
-   ```bash
-   chmod 755 application/
-   chmod 600 .env
-   ```
+1. **Clonar repositorio**:
+```bash
+git clone https://github.com/kerackdiaz/tracktraster.git
+cd tracktraster
+```
 
-### 🔧 Configuración de Variables de Entorno
+2. **Configurar variables de entorno**:
+```bash
+cp .env.example .env
+# Editar .env con tus configuraciones
+```
 
-Editar el archivo `.env` con tus configuraciones:
+3. **Configurar base de datos**:
+```sql
+CREATE DATABASE tracktraster_db;
+-- Importar estructura incluida
+```
 
+4. **Configurar permisos**:
+```bash
+chmod 755 application/
+chmod 600 .env
+```
+
+## 🎯 APIs Soportadas
+
+### ✅ Activas y Funcionales
+- **Spotify** - Búsqueda de artistas, datos de popularidad, imágenes
+- **Deezer** - Búsqueda de artistas, álbumes, datos de popularidad  
+- **Last.fm** - Biografías, estadísticas, datos de escucha
+
+### ⚙️ Configuración
+Editar `.env` con tus credenciales:
+```bash
+# Spotify (requerido)
+SPOTIFY_CLIENT_ID=tu_client_id
+SPOTIFY_CLIENT_SECRET=tu_client_secret
+SPOTIFY_ENABLED=true
+
+# Last.fm (requerido)  
+LASTFM_API_KEY=tu_api_key
+LASTFM_API_SECRET=tu_secret
+LASTFM_ENABLED=true
+
+# Deezer (sin configuración)
+DEEZER_ENABLED=true
+```
+
+## 🏗️ Estructura del Proyecto
+
+```
+tracktraster/
+├── index.php              # Punto de entrada
+├── .htaccess              # Configuración Apache
+├── .env                   # Variables de entorno
+├── application/
+│   ├── config/           # Configuración
+│   ├── controllers/      # Controladores MVC
+│   ├── core/             # Framework base
+│   ├── libraries/        # Librerías + APIs
+│   ├── models/           # Modelos de datos  
+│   └── views/            # Vistas y templates
+└── assets/               # Recursos estáticos
+```
+
+## 🔐 Panel de Administración
+
+Acceso: `/admin` con usuario administrador
+
+**Funcionalidades**:
+- ✅ Estado en tiempo real de las APIs
+- ✅ Pruebas automáticas de conectividad  
+- ✅ Información del sistema
+- ✅ Monitoreo y estadísticas
+
+## 🔒 Seguridad
+
+- **Variables de entorno** protegidas (.env inaccesible)
+- **Headers de seguridad** completos
+- **Content Security Policy** aplicada
+- **Protección de directorios** sensibles
+- **Archivos sensibles** bloqueados
+
+## 📊 Estado del Proyecto
+
+- **Versión**: 2.0 (Sistema simplificado)
+- **Tamaño**: 0.5 MB optimizado
+- **Archivos**: 67 esenciales únicamente
+- **APIs funcionales**: 3 plataformas estables
+- **Estado**: ✅ Listo para producción
+
+## 🚀 Despliegue
+
+### Servidor Compartido
+1. Subir archivos via FTP/cPanel
+2. Configurar `.env` con datos de producción
+3. Importar base de datos
+4. Verificar permisos (755/644)
+5. ¡Listo!
+
+### Variables de Producción
 ```bash
 # Base de datos
 DB_HOSTNAME=localhost
 DB_USERNAME=tu_usuario
 DB_PASSWORD=tu_password
-DB_DATABASE=tracktraster_db
+DB_DATABASE=tu_bd
 
-# URL de la aplicación
+# URL de producción
 APP_BASE_URL=https://tudominio.com/
 
-# APIs Musicales
-SPOTIFY_CLIENT_ID=tu_spotify_client_id
-SPOTIFY_CLIENT_SECRET=tu_spotify_client_secret
-SPOTIFY_ENABLED=true
-
-LASTFM_API_KEY=tu_lastfm_api_key
-LASTFM_API_SECRET=tu_lastfm_secret
-LASTFM_ENABLED=true
-
-DEEZER_ENABLED=true
+# APIs (configurar credenciales reales)
+SPOTIFY_CLIENT_ID=credencial_real
+LASTFM_API_KEY=credencial_real
 ```
 
-### 🎯 APIs Soportadas
+## 📞 Soporte
 
-#### ✅ Spotify
-- **Estado**: Completamente funcional
-- **Características**: Búsqueda de artistas, datos de popularidad, imágenes
-- **Configuración**: Requiere Client ID y Client Secret
-- **Obtener credenciales**: [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+Para issues y mejoras, usar el sistema de Issues de GitHub.
 
-#### ✅ Deezer  
-- **Estado**: Completamente funcional
-- **Características**: Búsqueda de artistas, datos de popularidad, álbumes
-- **Configuración**: No requiere credenciales (API pública)
-
-#### ✅ Last.fm
-- **Estado**: Completamente funcional  
-- **Características**: Búsqueda de artistas, biografías, estadísticas de escucha
-- **Configuración**: Requiere API Key y Secret
-- **Obtener credenciales**: [Last.fm API](https://www.last.fm/api/account/create)
-
-#### ❌ SoundCloud
-- **Estado**: Deshabilitado
-- **Motivo**: API limitada y restricciones de acceso
-
-#### ❌ YouTube Music
-- **Estado**: Deshabilitado
-- **Motivo**: Errores en la API (parámetros no válidos)
-
-### 🏗️ Estructura del Proyecto
-
-```
-tracktraster/
-├── index.php                    # Punto de entrada
-├── .htaccess                   # Reglas de reescritura
-├── .env                        # Variables de entorno (no incluir en repo)
-├── .env.example               # Plantilla de configuración
-├── application/
-│   ├── config/               # Configuración
-│   ├── controllers/          # Controladores MVC
-│   ├── core/                 # Clases base del framework
-│   ├── libraries/            # Librerías personalizadas
-│   │   ├── platforms/       # APIs de plataformas musicales
-│   │   └── MusicPlatformManager.php
-│   ├── models/              # Modelos de datos
-│   └── views/               # Vistas y templates
-└── assets/                   # Recursos estáticos
-    ├── css/
-    ├── js/
-    └── images/
-```
-
-### 🔐 Panel de Administración
-
-Accede al panel de administración en: `/admin`
-
-**Funcionalidades**:
-- ✅ Monitoreo del estado de las APIs
-- ✅ Pruebas automáticas de conectividad
-- ✅ Información del sistema
-- ✅ Estadísticas de uso
-
-**Usuario administrador**: Configurar en el código o usar `admin@tracktraster.com`
-
-### 🐛 Resolución de Problemas
-
-#### Error de conexión a base de datos
-- Verificar credenciales en `.env`
-- Verificar que la base de datos existe
-- Verificar permisos del usuario
-
-#### APIs no funcionan
-- Verificar credenciales en `.env`
-- Verificar que las APIs están habilitadas
-- Probar desde el panel de administración: `/admin/api_status`
-
-#### Páginas no cargan (Error 404)
-- Verificar que mod_rewrite esté habilitado
-- Verificar configuración de `.htaccess`
-- Verificar APP_BASE_URL en `.env`
-
-### 📞 Soporte
-
-Para reportar bugs o solicitar características:
-- Verificar la configuración del servidor
-- Revisar logs de errores
-- Comprobar el panel de administración
-
-### 📄 Licencia
+## 📄 Licencia
 
 Proyecto privado - Todos los derechos reservados
 
-### 🔄 Versión
+---
 
-**v2.0** - Sistema simplificado con gestión de credenciales via .env
-- Eliminada configuración web de APIs
-- Panel de administración de solo lectura
-- Configuración manual via archivo .env
-- 3 plataformas musicales estables (Spotify, Deezer, Last.fm) - Analítica Musical Inteligente
+**🎉 TrackTraster v2.0** - Sistema optimizado y listo para producción- Analítica Musical Inteligente
 
 Una aplicación web moderna para trackear el crecimiento de artistas musicales en países específicos de LATAM, especialmente útil para promotores de eventos y managers musicales.
 
