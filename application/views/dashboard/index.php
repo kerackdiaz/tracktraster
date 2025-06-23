@@ -63,25 +63,25 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="<<?= $base_url ?? '/' ?>artists/search" class="quick-action-btn">
+                        <a href="<?= $base_url ?? '/' ?>artists/search" class="quick-action-btn">
                             <i class="fas fa-search"></i>
                             <span>Buscar Artista</span>
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="<<?= $base_url ?? '/' ?>trackings/create" class="quick-action-btn">
+                        <a href="<?= $base_url ?? '/' ?>trackings/create" class="quick-action-btn">
                             <i class="fas fa-plus"></i>
                             <span>Nuevo Seguimiento</span>
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="<<?= $base_url ?? '/' ?>reports/generate" class="quick-action-btn">
+                        <a href="<?= $base_url ?? '/' ?>reports/generate" class="quick-action-btn">
                             <i class="fas fa-file-export"></i>
                             <span>Generar Reporte</span>
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="<<?= $base_url ?? '/' ?>analytics" class="quick-action-btn">
+                        <a href="<?= $base_url ?? '/' ?>analytics" class="quick-action-btn">
                             <i class="fas fa-chart-pie"></i>
                             <span>Ver Analíticas</span>
                         </a>
@@ -100,10 +100,10 @@
                 <h2>¡Bienvenido, <?= htmlspecialchars($user['full_name']) ?>!</h2>
                 <p>Empezemos a trackear el crecimiento de tus artistas. Puedes comenzar buscando un artista y creando tu primer seguimiento.</p>
                 <div class="welcome-actions">
-                    <a href="<<?= $base_url ?? '/' ?>artists/search" class="btn btn-primary">
+                    <a href="<?= $base_url ?? '/' ?>artists/search" class="btn btn-primary">
                         <i class="fas fa-search"></i> Buscar Artista
                     </a>
-                    <a href="<<?= $base_url ?? '/' ?>trackings" class="btn btn-outline-primary">
+                    <a href="<?= $base_url ?? '/' ?>trackings" class="btn btn-outline-primary">
                         <i class="fas fa-list"></i> Ver Seguimientos
                     </a>
                 </div>
@@ -129,7 +129,7 @@
                     <i class="fas fa-chart-area"></i>
                     <h6>No hay seguimientos activos</h6>
                     <p>Comienza creando tu primer seguimiento de artista para ver la actividad aquí.</p>
-                    <a href="<<?= $base_url ?? '/' ?>artists/search" class="btn btn-primary btn-sm">
+                    <a href="<?= $base_url ?? '/' ?>artists/search" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Crear Seguimiento
                     </a>
                 </div>
