@@ -4,7 +4,10 @@
  */
 
 class Trackings extends BaseController
-{    public function __construct($config)
+{
+    protected $lifecycleService;
+    
+    public function __construct($config)
     {
         parent::__construct($config);
         $this->requireAuth();

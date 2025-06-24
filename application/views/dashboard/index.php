@@ -86,6 +86,12 @@
                             <span>Ver Analíticas</span>
                         </a>
                     </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="<?= $base_url ?? '/' ?>analytics/systemDiagnostic?debug_key=diagnostic_2025" class="quick-action-btn" target="_blank">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Diagnóstico Sistema</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

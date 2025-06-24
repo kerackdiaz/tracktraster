@@ -48,7 +48,7 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <?php if (empty($tracked_artists)): ?>
                         <div class="text-center">
                             <p class="text-muted mb-2">No tienes artistas en seguimiento</p>
@@ -76,6 +76,22 @@
                             </div>
                         </div>
                         <?php endif; ?>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <a href="<?= ($base_url ?? '/') ?>analytics/systemDiagnostic?debug_key=diagnostic_2025" 
+                               class="btn btn-outline-secondary btn-sm" 
+                               target="_blank" 
+                               title="Diagnóstico del Sistema">
+                                <i class="fas fa-stethoscope"></i>
+                            </a>
+                            <a href="<?= ($base_url ?? '/') ?>analytics/populateMetrics?populate_key=populate_metrics_2025" 
+                               class="btn btn-outline-warning btn-sm" 
+                               target="_blank" 
+                               title="Poblar Métricas">
+                                <i class="fas fa-database"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

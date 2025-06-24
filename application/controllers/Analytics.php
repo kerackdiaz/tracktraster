@@ -4,7 +4,11 @@
  */
 
 class Analytics extends BaseController
-{    public function __construct($config)
+{
+    protected $analyticsService;
+    protected $lifecycleService;
+    
+    public function __construct($config)
     {
         parent::__construct($config);
         $this->requireAuth();
@@ -381,4 +385,121 @@ class Analytics extends BaseController
         echo "<p><strong>Resumen:</strong> $created métricas iniciales creadas de " . count($trackings) . " trackings procesados.</p>";
         echo "<p><a href='/analytics'>Ir a Analytics</a></p>";
     }
+    
+    /**
+     * Diagnóstico del sistema de tracking (solo para admin/debug)
+     */
+    public function systemDiagnostic()
+    {
+        // Solo accesible con clave de debug
+        $debugKey = $_GET['debug_key'] ?? '';
+        $validKey = 'diagnostic_2025';
+        
+        if ($debugKey !== $validKey) {
+            http_response_code(403);
+            die('Access denied. Use ?debug_key=diagnostic_2025');
+        }
+
+        echo "<h1>🔍 TrackTraster - Diagnóstico del Sistema</h1>";
+        echo "<p><strong>Fecha:</strong> " . date('Y-m-d H:i:s') . "</p>";
+        echo "<hr>";
+
+        // 1. Estado de la base de datos
+        echo "<h2>📊 Estado de la Base de Datos</h2>";
+        try {
+            $trackings = $this->db->fetchAll("SELECT COUNT(*) as total FROM artist_trackings WHERE status = 'active'");
+            $artists = $this->db->fetchAll("SELECT COUNT(*) as total FROM artists");
+            $users = $this->db->fetchAll("SELECT COUNT(*) as total FROM users");
+            
+            echo "<ul>";
+            echo "<li>Trackings activos: " . $trackings[0]['total'] . "</li>";
+            echo "<li>Artistas registrados: " . $artists[0]['total'] . "</li>";
+            echo "<li>Usuarios registrados: " . $users[0]['total'] . "</li>";
+            echo "</ul>";
+        } catch (Exception $e) {
+            echo "<p style='color: red;'>❌ Error conectando a la base de datos: " . $e->getMessage() . "</p>";
+        }
+
+        // 2. Estado de los servicios
+        echo "<h2>🔧 Estado de los Servicios</h2>";
+        echo "<ul>";
+        echo "<li>AnalyticsService: " . ($this->analyticsService ? "✅ Disponible" : "❌ No disponible") . "</li>";
+        echo "<li>TrackingLifecycleService: " . ($this->lifecycleService ? "✅ Disponible" : "❌ No disponible") . "</li>";
+        echo "</ul>";
+
+        // 3. Análisis de trackings
+        echo "<h2>📈 Análisis de Trackings</h2>";
+        try {
+            $trackingDetails = $this->db->fetchAll(
+                "SELECT at.id, at.artist_id, a.name as artist_name, at.event_name, at.event_date, 
+                        at.tracking_start_date, at.tracking_status,
+                        (SELECT COUNT(*) FROM spotify_metrics sm WHERE sm.tracking_id = at.id) as spotify_metrics_count,
+                        (SELECT COUNT(*) FROM lastfm_metrics lm WHERE lm.tracking_id = at.id) as lastfm_metrics_count
+                 FROM artist_trackings at 
+                 JOIN artists a ON at.artist_id = a.id 
+                 WHERE at.status = 'active'
+                 ORDER BY at.id DESC"
+            );
+
+            if (empty($trackingDetails)) {
+                echo "<p>No hay trackings activos.</p>";
+            } else {
+                echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+                echo "<tr style='background-color: #f0f0f0;'>";
+                echo "<th>ID</th><th>Artista</th><th>Evento</th><th>Fecha Evento</th><th>Estado</th><th>Métricas Spotify</th><th>Métricas Last.fm</th><th>Diagnóstico</th>";
+                echo "</tr>";
+
+                foreach ($trackingDetails as $tracking) {
+                    $hasMetrics = $tracking['spotify_metrics_count'] > 0 || $tracking['lastfm_metrics_count'] > 0;
+                    $diagnostic = $hasMetrics ? "✅ Con datos" : "⚠️ Sin métricas";
+                    
+                    echo "<tr>";
+                    echo "<td>{$tracking['id']}</td>";
+                    echo "<td>{$tracking['artist_name']}</td>";
+                    echo "<td>{$tracking['event_name']}</td>";
+                    echo "<td>{$tracking['event_date']}</td>";
+                    echo "<td>{$tracking['tracking_status']}</td>";
+                    echo "<td>{$tracking['spotify_metrics_count']}</td>";
+                    echo "<td>{$tracking['lastfm_metrics_count']}</td>";
+                    echo "<td>$diagnostic</td>";
+                    echo "</tr>";
+                }
+                echo "</table>";
+            }
+        } catch (Exception $e) {
+            echo "<p style='color: red;'>❌ Error analizando trackings: " . $e->getMessage() . "</p>";
+        }
+
+        // 4. Acciones de reparación
+        echo "<h2>🔧 Acciones de Reparación</h2>";
+        echo "<ul>";
+        echo "<li><a href='/analytics/populateMetrics?populate_key=populate_metrics_2025' target='_blank'>Poblar métricas faltantes</a></li>";
+        echo "<li><a href='/analytics/updateDailyMetrics?key=" . ($this->config['app']['cron_key'] ?? 'tracktraster_cron_2025') . "' target='_blank'>Actualizar métricas diarias</a></li>";
+        echo "</ul>";
+
+        // 5. Información del sistema
+        echo "<h2>💻 Información del Sistema</h2>";
+        echo "<ul>";
+        echo "<li>PHP Version: " . PHP_VERSION . "</li>";
+        echo "<li>Server Time: " . date('Y-m-d H:i:s') . "</li>";
+        echo "<li>Memory Usage: " . round(memory_get_usage() / 1024 / 1024, 2) . " MB</li>";
+        echo "</ul>";
+
+        // 6. Logs recientes (si existen)
+        echo "<h2>📝 Logs Recientes</h2>";
+        $logFile = dirname(dirname(dirname(__FILE__))) . '/logs/tracktraster.log';
+        if (file_exists($logFile)) {
+            $logLines = array_slice(file($logFile), -10);
+            echo "<pre style='background-color: #f5f5f5; padding: 10px; overflow-x: auto;'>";
+            foreach ($logLines as $line) {
+                echo htmlspecialchars($line);
+            }
+            echo "</pre>";
+        } else {
+            echo "<p>No se encontraron logs recientes.</p>";
+        }
+
+        echo "<hr>";
+        echo "<p><a href='/analytics'>← Volver a Analytics</a></p>";
+    }    // ...existing code...
 }
