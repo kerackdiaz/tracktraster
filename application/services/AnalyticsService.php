@@ -5,60 +5,93 @@
  */
 
 class AnalyticsService
-{
-    private $db;
+{    private $db;
     private $platformManager;
-    private $config;public function __construct($db, $config)
+    private $config;
+
+    public function __construct($db, $config)
     {
         $this->db = $db;
         $this->config = $config;
         
-        // Initialize existing Music Platform Manager
-        require_once APPPATH . 'libraries/MusicPlatformManager.php';
-        $this->platformManager = new MusicPlatformManager($config);
+        // Log de debugging
+        error_log("AnalyticsService: Iniciando constructor");
+        
+        try {
+            // Initialize existing Music Platform Manager
+            require_once APPPATH . 'libraries/MusicPlatformManager.php';
+            error_log("AnalyticsService: MusicPlatformManager cargado correctamente");
+            
+            $this->platformManager = new MusicPlatformManager($config);
+            error_log("AnalyticsService: MusicPlatformManager instanciado correctamente");
+        } catch (Exception $e) {
+            error_log("AnalyticsService: Error al inicializar MusicPlatformManager: " . $e->getMessage());
+            error_log("AnalyticsService: Stack trace: " . $e->getTraceAsString());
+            throw $e;
+        }
     }
 
     /**
      * Obtener analíticas reales del artista
-     */
-    public function getArtistAnalytics($artistId, $userId)
+     */    public function getArtistAnalytics($artistId, $userId)
     {
-        // Verificar acceso del usuario
-        $tracking = $this->db->fetchOne(
-            "SELECT at.*, a.name as artist_name, a.spotify_id, a.lastfm_name 
-             FROM artist_trackings at 
-             JOIN artists a ON at.artist_id = a.id 
-             WHERE at.artist_id = ? AND at.user_id = ? AND at.status = 'active'",
-            [$artistId, $userId]
-        );
+        error_log("AnalyticsService: getArtistAnalytics iniciado - Artist ID: $artistId, User ID: $userId");
+        
+        try {
+            // Verificar acceso del usuario
+            error_log("AnalyticsService: Verificando acceso del usuario");
+            $tracking = $this->db->fetchOne(
+                "SELECT at.*, a.name as artist_name, a.spotify_id, a.lastfm_name 
+                 FROM artist_trackings at 
+                 JOIN artists a ON at.artist_id = a.id 
+                 WHERE at.artist_id = ? AND at.user_id = ? AND at.status = 'active'",
+                [$artistId, $userId]
+            );
 
-        if (!$tracking) {
-            throw new Exception('No tienes acceso a este artista');
+            if (!$tracking) {
+                error_log("AnalyticsService: No se encontró tracking para artista $artistId y usuario $userId");
+                throw new Exception('No tienes acceso a este artista');
+            }
+            
+            error_log("AnalyticsService: Tracking encontrado - ID: {$tracking['id']}, Artista: {$tracking['artist_name']}");
+
+            // Obtener métricas actuales de las APIs
+            error_log("AnalyticsService: Obteniendo métricas actuales");
+            $currentMetrics = $this->getCurrentMetrics($tracking);
+            
+            // Obtener datos históricos de la base de datos
+            error_log("AnalyticsService: Obteniendo datos históricos");
+            $historicalData = $this->getHistoricalData($tracking['id']);
+            
+            // Calcular tendencias y crecimiento
+            error_log("AnalyticsService: Calculando tendencias");
+            $trends = $this->calculateTrends($historicalData);
+            
+            error_log("AnalyticsService: Generando resultado final");
+            // Generar analíticas completas
+            return [
+                'summary' => $this->generateSummary($currentMetrics, $historicalData, $tracking),
+                'trends' => $trends,
+                'charts' => $this->generateChartData($historicalData),
+                'regional_data' => $this->getRegionalData($tracking),
+                'platforms' => $currentMetrics,
+                'tracking_info' => $tracking
+            ];
+            
+        } catch (Exception $e) {
+            error_log("AnalyticsService: ERROR en getArtistAnalytics: " . $e->getMessage());
+            error_log("AnalyticsService: Stack trace: " . $e->getTraceAsString());
+            throw $e;
         }
+    }
 
-        // Obtener métricas actuales de las APIs
-        $currentMetrics = $this->getCurrentMetrics($tracking);
-        
-        // Obtener datos históricos de la base de datos
-        $historicalData = $this->getHistoricalData($tracking['id']);
-        
-        // Calcular tendencias y crecimiento
-        $trends = $this->calculateTrends($historicalData);
-        
-        // Generar analíticas completas
-        return [
-            'summary' => $this->generateSummary($currentMetrics, $historicalData, $tracking),
-            'trends' => $trends,
-            'charts' => $this->generateChartData($historicalData),
-            'regional_data' => $this->getRegionalData($tracking),
-            'platforms' => $currentMetrics,
-            'tracking_info' => $tracking
-        ];
-    }    /**
+    /**
      * Obtener métricas actuales de todas las plataformas
      */
     private function getCurrentMetrics($tracking)
     {
+        error_log("AnalyticsService: getCurrentMetrics iniciado para artista: {$tracking['artist_name']}");
+        
         $metrics = [
             'spotify' => null,
             'deezer' => null,
@@ -68,47 +101,52 @@ class AnalyticsService
         ];
 
         try {
-            // Usar el MusicPlatformManager existente para obtener datos
-            $platformData = $this->platformManager->searchArtistAllPlatforms($tracking['artist_name']);
+            error_log("AnalyticsService: Buscando artista en plataformas con MusicPlatformManager");
             
-            if (isset($platformData['platforms_data'])) {
-                // Spotify
-                if (isset($platformData['platforms_data']['spotify']) && 
-                    $platformData['platforms_data']['spotify']['status'] === 'found') {
-                    
-                    $spotifyData = $platformData['platforms_data']['spotify'];
-                    $metrics['spotify'] = [
-                        'followers' => $spotifyData['followers'] ?? 0,
-                        'popularity' => $spotifyData['popularity'] ?? 0,
-                        'monthly_listeners' => 0 // No disponible en búsqueda básica
-                    ];
-                    $metrics['total_followers'] += $spotifyData['followers'] ?? 0;
+            // Usar el MusicPlatformManager existente para obtener datos
+            $searchResults = $this->platformManager->searchArtists($tracking['artist_name'], 'all', 1);
+            
+            error_log("AnalyticsService: Resultados de búsqueda obtenidos: " . json_encode($searchResults, JSON_UNESCAPED_UNICODE));
+            
+            if (isset($searchResults['combined_results']) && !empty($searchResults['combined_results'])) {
+                // Tomar el primer resultado (más relevante)
+                $artistData = $searchResults['combined_results'][0];
+                
+                // Verificar qué plataformas encontraron el artista
+                foreach ($searchResults['platforms'] as $platform => $platformResults) {
+                    if (!empty($platformResults['results'])) {
+                        $result = $platformResults['results'][0]; // Primer resultado
+                        
+                        if ($platform === 'spotify') {
+                            $metrics['spotify'] = [
+                                'followers' => $result['followers'] ?? 0,
+                                'popularity' => $result['popularity'] ?? 0,
+                                'monthly_listeners' => 0 // No disponible en búsqueda básica
+                            ];
+                            $metrics['total_followers'] += $result['followers'] ?? 0;
+                        }
+                        
+                        if ($platform === 'deezer') {
+                            $metrics['deezer'] = [
+                                'fans' => $result['followers'] ?? 0
+                            ];
+                            $metrics['total_followers'] += $result['followers'] ?? 0;
+                        }
+                        
+                        if ($platform === 'lastfm') {
+                            $metrics['lastfm'] = [
+                                'listeners' => $result['followers'] ?? 0,
+                                'playcount' => $result['playcount'] ?? 0
+                            ];
+                        }
+                    }
                 }
-
-                // Deezer
-                if (isset($platformData['platforms_data']['deezer']) && 
-                    $platformData['platforms_data']['deezer']['status'] === 'found') {
-                    
-                    $deezerData = $platformData['platforms_data']['deezer'];
-                    $metrics['deezer'] = [
-                        'fans' => $deezerData['fans'] ?? 0
-                    ];
-                    $metrics['total_followers'] += $deezerData['fans'] ?? 0;
-                }
-
-                // Last.fm
-                if (isset($platformData['platforms_data']['lastfm']) && 
-                    $platformData['platforms_data']['lastfm']['status'] === 'found') {
-                    
-                    $lastfmData = $platformData['platforms_data']['lastfm'];
-                    $metrics['lastfm'] = [
-                        'listeners' => $lastfmData['listeners'] ?? 0,
-                        'playcount' => $lastfmData['playcount'] ?? 0
-                    ];
-                }
+            } else {
+                error_log("AnalyticsService: No se encontraron resultados para el artista: {$tracking['artist_name']}");
             }
         } catch (Exception $e) {
-            error_log("Error getting platform metrics: " . $e->getMessage());
+            error_log("AnalyticsService: Error getting platform metrics: " . $e->getMessage());
+            error_log("AnalyticsService: Stack trace en getCurrentMetrics: " . $e->getTraceAsString());
         }
 
         // Calcular popularidad promedio
@@ -118,6 +156,7 @@ class AnalyticsService
         $metrics['avg_popularity'] = !empty($popularityValues) ? 
             array_sum($popularityValues) / count($popularityValues) : 0;
 
+        error_log("AnalyticsService: Métricas finales: " . json_encode($metrics, JSON_UNESCAPED_UNICODE));
         return $metrics;
     }
 
@@ -313,9 +352,8 @@ class AnalyticsService
      * Guardar métricas diarias
      */
     public function saveDailyMetrics($trackingId)
-    {
-        $tracking = $this->db->fetchOne(
-            "SELECT at.*, a.spotify_id, a.lastfm_name 
+    {        $tracking = $this->db->fetchOne(
+            "SELECT at.*, a.spotify_id 
              FROM artist_trackings at 
              JOIN artists a ON at.artist_id = a.id 
              WHERE at.id = ?",
