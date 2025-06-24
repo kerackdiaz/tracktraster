@@ -279,4 +279,58 @@ class Analytics extends BaseController
             $this->redirect('analytics');
         }
     }
+    
+    /**
+     * Poblar métricas faltantes para trackings existentes
+     */
+    public function populateMetrics()
+    {
+        // Solo accesible desde admin o con clave
+        $debugKey = $_GET['populate_key'] ?? '';
+        $validKey = 'populate_metrics_2025';
+        
+        if ($debugKey !== $validKey) {
+            http_response_code(403);
+            die('Access denied. Use ?populate_key=populate_metrics_2025');
+        }
+
+        if (!$this->analyticsService) {
+            die('Analytics service not available');
+        }
+
+        // Obtener trackings sin métricas
+        $trackings = $this->db->fetchAll(
+            "SELECT at.id, at.artist_id, at.tracking_start_date, a.name as artist_name 
+             FROM artist_trackings at 
+             JOIN artists a ON at.artist_id = a.id 
+             LEFT JOIN spotify_metrics sm ON sm.tracking_id = at.id
+             WHERE at.status = 'active' AND sm.id IS NULL"
+        );
+
+        echo "<h1>Poblando Métricas Faltantes</h1>";
+        echo "<p>Trackings sin métricas encontrados: " . count($trackings) . "</p>";
+
+        $created = 0;
+        foreach ($trackings as $tracking) {
+            echo "<p>Procesando: {$tracking['artist_name']} (ID: {$tracking['id']})</p>";
+            
+            try {
+                if ($this->analyticsService->createInitialMetrics($tracking['id'])) {
+                    $created++;
+                    echo "<p style='color: green;'>✅ Métricas creadas exitosamente</p>";
+                } else {
+                    echo "<p style='color: red;'>❌ Error creando métricas</p>";
+                }
+            } catch (Exception $e) {
+                echo "<p style='color: red;'>❌ Error: " . $e->getMessage() . "</p>";
+            }
+            
+            // Small delay to avoid overwhelming the system
+            usleep(100000); // 0.1 seconds
+        }
+
+        echo "<hr>";
+        echo "<p><strong>Resumen:</strong> $created métricas iniciales creadas de " . count($trackings) . " trackings procesados.</p>";
+        echo "<p><a href='/analytics'>Ir a Analytics</a></p>";
+    }
 }

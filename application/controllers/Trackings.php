@@ -208,9 +208,7 @@ class Trackings extends BaseController
             if ($existingTracking) {
                 $this->session->setFlash('error', 'Ya tienes un seguimiento activo para este artista');
                 $this->redirect('artists/view/' . $trackingData['artist_id']);
-            }
-
-            // Create tracking
+            }            // Create tracking
             $result = $this->db->execute(
                 "INSERT INTO artist_trackings (user_id, artist_id, country_code, event_name, event_date, tracking_start_date, notes, status, created_at) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
@@ -218,6 +216,20 @@ class Trackings extends BaseController
                  $trackingData['event_name'], $trackingData['event_date'], 
                  $trackingData['tracking_start_date'], $trackingData['notes'], $trackingData['status']]
             );
+
+            // Get the tracking ID and create initial metrics
+            $trackingId = $result['insert_id'];
+            if ($trackingId && $trackingData['status'] === 'active') {
+                try {
+                    require_once APPPATH . 'services/AnalyticsService.php';
+                    $analyticsService = new AnalyticsService($this->db, $this->config);
+                    $analyticsService->createInitialMetrics($trackingId);
+                    error_log("Initial metrics created for tracking ID: $trackingId");
+                } catch (Exception $e) {
+                    error_log("Error creating initial metrics for tracking $trackingId: " . $e->getMessage());
+                    // No interrumpir el flujo si falla la creación de métricas
+                }
+            }
 
             $this->session->setFlash('success', 'Seguimiento creado exitosamente para ' . $artist['name']);
             $this->redirect('artists/view/' . $trackingData['artist_id']);
