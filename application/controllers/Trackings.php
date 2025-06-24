@@ -4,34 +4,41 @@
  */
 
 class Trackings extends BaseController
-{
-    public function __construct($config)
+{    public function __construct($config)
     {
         parent::__construct($config);
         $this->requireAuth();
-    }    public function index()
+        
+        // Initialize tracking lifecycle service
+        try {
+            require_once APPPATH . 'services/TrackingLifecycleService.php';
+            $this->lifecycleService = new TrackingLifecycleService($this->db);
+            
+            // Update tracking statuses on each request
+            $this->lifecycleService->updateTrackingStatuses();
+        } catch (Exception $e) {
+            error_log("TrackingLifecycleService initialization error: " . $e->getMessage());
+            $this->lifecycleService = null;
+        }
+    }public function index()
     {
         $user = $this->session->getUser();
-        
-        // Get all trackings for the user
+          // Get all trackings for the user
         $trackings = [];
         try {
             $trackings = $this->db->fetchAll(
                 "SELECT at.*, a.name as artist_name, a.image_url, a.popularity, 
                         DATEDIFF(COALESCE(at.event_date, NOW()), at.tracking_start_date) as tracking_days,
-                        CASE 
-                            WHEN at.event_date IS NOT NULL AND at.event_date < NOW() THEN 'completed'
-                            WHEN at.event_date IS NOT NULL THEN 'pending'
-                            ELSE 'ongoing'
-                        END as tracking_status
+                        DATEDIFF(COALESCE(at.event_date, DATE_ADD(CURDATE(), INTERVAL 30 DAY)), CURDATE()) as days_to_event,
+                        at.tracking_status
                  FROM artist_trackings at 
                  JOIN artists a ON at.artist_id = a.id 
                  WHERE at.user_id = ? 
-                 ORDER BY at.created_at DESC",
+                 ORDER BY at.event_date ASC, at.created_at DESC",
                 [$user['id']]
             );
             
-            // Enriquecer con datos de múltiples plataformas
+            // Enriquecer con datos de múltiples plataformas y lifecycle
             $trackings = $this->enrichTrackingsWithPlatformData($trackings);
             
         } catch (Exception $e) {
@@ -49,10 +56,8 @@ class Trackings extends BaseController
         ];
 
         $this->loadView('trackings/index', $data);
-    }
-
-    /**
-     * Enriquecer seguimientos con datos de múltiples plataformas
+    }    /**
+     * Enriquecer seguimientos con datos de múltiples plataformas y lifecycle info
      */
     private function enrichTrackingsWithPlatformData($trackings)
     {
@@ -78,12 +83,23 @@ class Trackings extends BaseController
                     $tracking['avg_popularity_all_platforms'] = $metrics['avg_popularity'];
                     $tracking['platforms_available'] = $metrics['platforms_count'];
 
+                    // Obtener información del lifecycle si está disponible
+                    if ($this->lifecycleService) {
+                        $lifecycle = $this->lifecycleService->getTrackingLifecycle($tracking['id']);
+                        if ($lifecycle) {
+                            $tracking['lifecycle'] = $lifecycle;
+                            $tracking['phase'] = $lifecycle['phase'];
+                            $tracking['progress_percentage'] = $lifecycle['progress_percentage'];
+                        }
+                    }
+
                 } catch (Exception $e) {
                     // Si falla la obtención de métricas, continuar sin ellas
                     $tracking['platform_metrics'] = null;
                     $tracking['total_followers_all_platforms'] = 0;
                     $tracking['avg_popularity_all_platforms'] = 0;
                     $tracking['platforms_available'] = 0;
+                    $tracking['lifecycle'] = null;
                 }
             }
 
@@ -397,4 +413,47 @@ class Trackings extends BaseController
             $this->redirect('trackings');
         }
     }
+
+    /**
+     * Endpoint para actualizar estados de tracking (cron job)
+     */
+    public function updateStatuses()
+    {
+        // Solo accesible desde cron o admin
+        if (!$this->isValidCronRequest()) {
+            http_response_code(403);
+            die('Access denied');
+        }
+
+        if (!$this->lifecycleService) {
+            echo "TrackingLifecycleService not available\n";
+            return;
+        }
+
+        try {
+            $this->lifecycleService->updateTrackingStatuses();
+            echo "Tracking statuses updated successfully\n";
+        } catch (Exception $e) {
+            echo "Error updating tracking statuses: " . $e->getMessage() . "\n";
+        }
+    }
+
+    /**
+     * Verificar si la solicitud es válida para cron
+     */
+    private function isValidCronRequest()
+    {
+        // Permitir acceso desde localhost
+        if (in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])) {
+            return true;
+        }
+        
+        // Permitir acceso con token válido
+        $token = $_GET['token'] ?? $_POST['token'] ?? '';
+        $validToken = $this->config['cron_token'] ?? 'default_cron_token';
+        
+        return $token === $validToken;
+    }
+
+    // ...existing code...
 }

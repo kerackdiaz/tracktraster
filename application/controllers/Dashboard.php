@@ -4,26 +4,59 @@
  */
 
 class Dashboard extends BaseController
-{
-    public function __construct($config)
+{    public function __construct($config)
     {
         parent::__construct($config);
         $this->requireAuth(); // Require authentication for all dashboard methods
+        
+        // Initialize tracking lifecycle service
+        try {
+            require_once APPPATH . 'services/TrackingLifecycleService.php';
+            $this->lifecycleService = new TrackingLifecycleService($this->db);
+        } catch (Exception $e) {
+            error_log("TrackingLifecycleService initialization error: " . $e->getMessage());
+            $this->lifecycleService = null;
+        }
     }    public function index()
     {
         $user = $this->session->getUser();
         
-        // Get user's trackings count (with error handling)
+        // Update tracking statuses
+        if ($this->lifecycleService) {
+            try {
+                $this->lifecycleService->updateTrackingStatuses();
+            } catch (Exception $e) {
+                error_log("Error updating tracking statuses: " . $e->getMessage());
+            }
+        }
+        
+        // Get user's trackings count and upcoming events
         $trackingsCount = 0;
+        $upcomingEvents = [];
         try {
             $result = $this->db->fetchOne(
                 "SELECT COUNT(*) as count FROM artist_trackings WHERE user_id = ? AND status = 'active'",
                 [$user['id']]
             );
             $trackingsCount = $result['count'] ?? 0;
+            
+            // Get upcoming events (next 30 days)
+            $upcomingEvents = $this->db->fetchAll(
+                "SELECT at.*, a.name as artist_name, a.image_url,
+                        DATEDIFF(at.event_date, CURDATE()) as days_to_event
+                 FROM artist_trackings at
+                 JOIN artists a ON at.artist_id = a.id
+                 WHERE at.user_id = ? AND at.status = 'active' 
+                       AND at.event_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+                 ORDER BY at.event_date ASC
+                 LIMIT 5",
+                [$user['id']]
+            );
+            
         } catch (Exception $e) {
             // Table doesn't exist yet, that's ok
             $trackingsCount = 0;
+            $upcomingEvents = [];
         }
 
         // Get recent alerts count (with error handling)
@@ -44,6 +77,7 @@ class Dashboard extends BaseController
             'user' => $user,
             'trackings_count' => $trackingsCount,
             'alerts_count' => $alertsCount,
+            'upcoming_events' => $upcomingEvents,
             'countries' => $this->config['countries']
         ];
 

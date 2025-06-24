@@ -17,43 +17,69 @@ class Analytics extends BaseController
             error_log("Analytics service initialization error: " . $e->getMessage());
             $this->analyticsService = null;
         }
+        
+        // Initialize tracking lifecycle service
+        try {
+            require_once APPPATH . 'services/TrackingLifecycleService.php';
+            $this->lifecycleService = new TrackingLifecycleService($this->db);
+        } catch (Exception $e) {
+            error_log("TrackingLifecycleService initialization error: " . $e->getMessage());
+            $this->lifecycleService = null;
+        }
     }
 
     public function index()
     {
         $user = $this->session->getUser();
         $artistId = $_GET['artist_id'] ?? null;
-        
-        // Get user's tracked artists for dropdown
+          // Get user's tracked artists for dropdown
         $trackedArtists = [];
         try {
             $trackedArtists = $this->db->fetchAll(
-                "SELECT DISTINCT a.id, a.name, a.image_url 
+                "SELECT DISTINCT a.id, a.name, a.image_url, at.event_name, at.event_date,
+                        at.tracking_status, at.tracking_start_date,
+                        DATEDIFF(COALESCE(at.event_date, DATE_ADD(CURDATE(), INTERVAL 30 DAY)), CURDATE()) as days_to_event
                  FROM artists a 
                  JOIN artist_trackings at ON a.id = at.artist_id 
                  WHERE at.user_id = ? AND at.status = 'active'
-                 ORDER BY a.name",
+                 ORDER BY at.event_date ASC, a.name",
                 [$user['id']]
             );
         } catch (Exception $e) {
             $trackedArtists = [];
-        }
-
-        $selectedArtist = null;
+        }        $selectedArtist = null;
         $analytics = null;
+        $lifecycle = null;
 
         if ($artistId && !empty($trackedArtists)) {
             try {
-                // Verify user has access to this artist
-                $selectedArtist = $this->db->fetchOne(
-                    "SELECT a.*, at.country_code, at.event_name, at.event_date, at.tracking_start_date 
+                // Verify user has access to this artist and get tracking info
+                $trackingInfo = $this->db->fetchOne(
+                    "SELECT at.id as tracking_id, a.*, at.country_code, at.event_name, at.event_date, 
+                            at.tracking_start_date, at.tracking_status, at.event_city, at.event_venue
                      FROM artists a 
                      JOIN artist_trackings at ON a.id = at.artist_id 
                      WHERE a.id = ? AND at.user_id = ? AND at.status = 'active'",
                     [$artistId, $user['id']]
-                );                if ($selectedArtist) {
-                    // Get real analytics data with better error handling
-                    if ($this->analyticsService) {
+                );
+
+                if ($trackingInfo) {
+                    $selectedArtist = $trackingInfo;
+                    
+                    // Get lifecycle information
+                    if ($this->lifecycleService) {
+                        $lifecycle = $this->lifecycleService->getTrackingLifecycle($trackingInfo['tracking_id']);
+                    }
+                    
+                    // Get event-contextual analytics
+                    if ($this->analyticsService && $this->lifecycleService) {
+                        try {
+                            $analytics = $this->lifecycleService->getEventContextualMetrics($trackingInfo['tracking_id']);
+                        } catch (Exception $e) {
+                            error_log("Event contextual analytics error: " . $e->getMessage());
+                            $analytics = $this->analyticsService->getArtistAnalytics($artistId, $user['id']);
+                        }
+                    } elseif ($this->analyticsService) {
                         try {
                             $analytics = $this->analyticsService->getArtistAnalytics($artistId, $user['id']);
                         } catch (Exception $e) {
@@ -61,16 +87,15 @@ class Analytics extends BaseController
                             $analytics = $this->generateBasicAnalytics($selectedArtist);
                         }
                     } else {
-                        // Fallback when service is not available
+                        // Fallback when services are not available
                         $analytics = $this->generateBasicAnalytics($selectedArtist);
                     }
                 }
             } catch (Exception $e) {
                 $selectedArtist = null;
+                error_log("Error loading artist analytics: " . $e->getMessage());
             }
-        }
-
-        $data = [
+        }        $data = [
             'title' => 'Analíticas - TrackTraster',
             'page_title' => 'Analíticas de Artistas',
             'active_menu' => 'analytics',
@@ -78,6 +103,7 @@ class Analytics extends BaseController
             'tracked_artists' => $trackedArtists,
             'selected_artist' => $selectedArtist,
             'analytics' => $analytics,
+            'lifecycle' => $lifecycle,
             'countries' => $this->config['countries']
         ];
 

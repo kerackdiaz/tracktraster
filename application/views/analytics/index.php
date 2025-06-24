@@ -27,11 +27,23 @@
                     <div class="col-md-6">
                         <label for="artistSelector" class="form-label mb-2">Seleccionar artista para analizar:</label>
                         <select class="form-select" id="artistSelector" onchange="changeArtist()">
-                            <option value="">Selecciona un artista...</option>
-                            <?php foreach ($tracked_artists as $artist): ?>
+                            <option value="">Selecciona un artista...</option>                            <?php foreach ($tracked_artists as $artist): ?>
                             <option value="<?= $artist['id'] ?>" 
-                                    <?= ($selected_artist && $selected_artist['id'] == $artist['id']) ? 'selected' : '' ?>>
+                                    <?= ($selected_artist && $selected_artist['id'] == $artist['id']) ? 'selected' : '' ?>
+                                    data-event="<?= htmlspecialchars($artist['event_name']) ?>"
+                                    data-days="<?= $artist['days_to_event'] ?>"
+                                    data-status="<?= $artist['tracking_status'] ?>">
                                 <?= htmlspecialchars($artist['name']) ?>
+                                <?php if ($artist['event_name']): ?>
+                                - <?= htmlspecialchars($artist['event_name']) ?>
+                                <?php if ($artist['days_to_event'] > 0): ?>
+                                (<?= $artist['days_to_event'] ?> días)
+                                <?php elseif ($artist['days_to_event'] == 0): ?>
+                                (HOY)
+                                <?php else: ?>
+                                (evento pasado)
+                                <?php endif; ?>
+                                <?php endif; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
@@ -44,8 +56,7 @@
                                 <i class="fas fa-plus"></i> Agregar Artista
                             </a>
                         </div>
-                        <?php elseif ($selected_artist): ?>
-                        <div class="selected-artist-info text-center">
+                        <?php elseif ($selected_artist): ?>                        <div class="selected-artist-info text-center">
                             <div class="d-flex align-items-center justify-content-center">
                                 <?php if ($selected_artist['image_url']): ?>
                                 <img src="<?= htmlspecialchars($selected_artist['image_url']) ?>" 
@@ -57,6 +68,9 @@
                                     <strong><?= htmlspecialchars($selected_artist['name']) ?></strong>
                                     <br><small class="text-muted">
                                         Seguimiento en <?= $countries[$selected_artist['country_code']] ?? 'País desconocido' ?>
+                                        <?php if ($selected_artist['event_name']): ?>
+                                        - <?= htmlspecialchars($selected_artist['event_name']) ?>
+                                        <?php endif; ?>
                                     </small>
                                 </div>
                             </div>
@@ -273,6 +287,174 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <?php if ($selected_artist && $lifecycle): ?>
+        <!-- Información del evento y progreso -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt"></i> 
+                    Progreso hacia el Evento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">
+                                    <?= $lifecycle['event_name'] ? htmlspecialchars($lifecycle['event_name']) : 'Seguimiento General' ?>
+                                </span>
+                                <span class="badge bg-<?= 
+                                    $lifecycle['phase'] == 'pre-tracking' ? 'secondary' :
+                                    ($lifecycle['phase'] == 'early-tracking' ? 'info' :
+                                    ($lifecycle['phase'] == 'mid-tracking' ? 'warning' :
+                                    ($lifecycle['phase'] == 'pre-event' ? 'danger' :
+                                    ($lifecycle['phase'] == 'event-day' ? 'success' : 'dark'))))
+                                ?>">
+                                    <?= 
+                                        $lifecycle['phase'] == 'pre-tracking' ? 'Pre-seguimiento' :
+                                        ($lifecycle['phase'] == 'early-tracking' ? 'Seguimiento Inicial' :
+                                        ($lifecycle['phase'] == 'mid-tracking' ? 'Seguimiento Medio' :
+                                        ($lifecycle['phase'] == 'pre-event' ? 'Pre-evento' :
+                                        ($lifecycle['phase'] == 'event-day' ? 'Día del Evento' : 'Post-evento'))))
+                                    ?>
+                                </span>
+                            </div>
+                            
+                            <?php if ($lifecycle['event_date']): ?>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-gradient" 
+                                     role="progressbar" 
+                                     style="width: <?= $lifecycle['progress_percentage'] ?>%"
+                                     aria-valuenow="<?= $lifecycle['progress_percentage'] ?>" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    <?= round($lifecycle['progress_percentage'], 1) ?>%
+                                </div>
+                            </div>
+                            
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="text-primary">
+                                        <i class="fas fa-play"></i>
+                                        <div class="small">Inicio</div>
+                                        <div class="fw-bold"><?= date('d/m', strtotime($lifecycle['tracking_start_date'])) ?></div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-info">
+                                        <i class="fas fa-clock"></i>
+                                        <div class="small">Días restantes</div>
+                                        <div class="fw-bold">
+                                            <?= $lifecycle['days_to_event'] > 0 ? $lifecycle['days_to_event'] : ($lifecycle['days_to_event'] == 0 ? 'HOY' : 'Pasado') ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-success">
+                                        <i class="fas fa-flag-checkered"></i>
+                                        <div class="small">Evento</div>
+                                        <div class="fw-bold"><?= date('d/m', strtotime($lifecycle['event_date'])) ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Días de seguimiento</h6>
+                                <div class="h4 mb-1"><?= $lifecycle['days_tracking'] ?></div>
+                                <small class="text-muted">
+                                    Desde <?= date('d/m/Y', strtotime($lifecycle['tracking_start_date'])) ?>
+                                </small>
+                                
+                                <?php if ($lifecycle['event_city'] || $lifecycle['event_venue']): ?>
+                                <hr class="my-2">
+                                <div class="small">
+                                    <?php if ($lifecycle['event_venue']): ?>
+                                    <div><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($lifecycle['event_venue']) ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($lifecycle['event_city']): ?>
+                                    <div><i class="fas fa-city"></i> <?= htmlspecialchars($lifecycle['event_city']) ?></div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>        </div>
+        <?php endif; ?>
+        
+        <?php if ($selected_artist && $lifecycle && isset($analytics['lifecycle']['recommendations'])): ?>
+        <!-- Recomendaciones según la fase del evento -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb text-warning"></i>
+                    Recomendaciones para esta Fase
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Fase actual:</strong> 
+                    <?= 
+                        $lifecycle['phase'] == 'pre-tracking' ? 'Pre-seguimiento' :
+                        ($lifecycle['phase'] == 'early-tracking' ? 'Seguimiento Inicial' :
+                        ($lifecycle['phase'] == 'mid-tracking' ? 'Seguimiento Medio' :
+                        ($lifecycle['phase'] == 'pre-event' ? 'Pre-evento' :
+                        ($lifecycle['phase'] == 'event-day' ? 'Día del Evento' : 'Post-evento'))))
+                    ?>
+                    <?php if ($lifecycle['days_to_event'] > 0): ?>
+                    - <?= $lifecycle['days_to_event'] ?> días para el evento
+                    <?php elseif ($lifecycle['days_to_event'] == 0): ?>
+                    - ¡Hoy es el evento!
+                    <?php endif; ?>
+                </div>
+                
+                <div class="row">
+                    <?php foreach ($analytics['lifecycle']['recommendations'] as $index => $recommendation): ?>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <span class="badge bg-primary rounded-pill"><?= $index + 1 ?></span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-0"><?= htmlspecialchars($recommendation) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <?php if (isset($analytics['growth_towards_event']) && !empty($analytics['growth_towards_event'])): ?>
+                <hr>
+                <h6>Crecimiento hacia el evento:</h6>
+                <div class="row">
+                    <?php foreach ($analytics['growth_towards_event'] as $platform => $growth): ?>
+                    <?php if (isset($growth['followers_growth'])): ?>
+                    <div class="col-md-3 mb-2">
+                        <div class="text-center">
+                            <div class="text-uppercase small text-muted"><?= $platform ?></div>
+                            <div class="fw-bold <?= $growth['followers_growth'] >= 0 ? 'text-success' : 'text-danger' ?>">
+                                <?= $growth['followers_growth'] >= 0 ? '+' : '' ?><?= number_format($growth['followers_growth']) ?>
+                            </div>
+                            <div class="small text-muted">
+                                (<?= $growth['followers_growth_percentage'] >= 0 ? '+' : '' ?><?= round($growth['followers_growth_percentage'], 1) ?>%)
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endif; ?>
