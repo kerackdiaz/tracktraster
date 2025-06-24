@@ -26,13 +26,12 @@ class Analytics extends BaseController
             error_log("TrackingLifecycleService initialization error: " . $e->getMessage());
             $this->lifecycleService = null;
         }
-    }
-
-    public function index()
+    }    public function index()
     {
         $user = $this->session->getUser();
         $artistId = $_GET['artist_id'] ?? null;
-          // Get user's tracked artists for dropdown
+        
+        // Get user's tracked artists for dropdown
         $trackedArtists = [];
         try {
             $trackedArtists = $this->db->fetchAll(
@@ -47,7 +46,14 @@ class Analytics extends BaseController
             );
         } catch (Exception $e) {
             $trackedArtists = [];
-        }        $selectedArtist = null;
+        }
+
+        // Auto-select artist if no artist selected but there's only one tracked artist
+        if (!$artistId && count($trackedArtists) === 1) {
+            $artistId = $trackedArtists[0]['id'];
+        }
+
+        $selectedArtist = null;
         $analytics = null;
         $lifecycle = null;
 
@@ -77,7 +83,13 @@ class Analytics extends BaseController
                             $analytics = $this->lifecycleService->getEventContextualMetrics($trackingInfo['tracking_id']);
                         } catch (Exception $e) {
                             error_log("Event contextual analytics error: " . $e->getMessage());
-                            $analytics = $this->analyticsService->getArtistAnalytics($artistId, $user['id']);
+                            // Fallback to regular analytics
+                            try {
+                                $analytics = $this->analyticsService->getArtistAnalytics($artistId, $user['id']);
+                            } catch (Exception $e2) {
+                                error_log("Regular analytics error: " . $e2->getMessage());
+                                $analytics = $this->generateBasicAnalytics($selectedArtist);
+                            }
                         }
                     } elseif ($this->analyticsService) {
                         try {
@@ -95,7 +107,7 @@ class Analytics extends BaseController
                 $selectedArtist = null;
                 error_log("Error loading artist analytics: " . $e->getMessage());
             }
-        }        $data = [
+        }$data = [
             'title' => 'Analíticas - TrackTraster',
             'page_title' => 'Analíticas de Artistas',
             'active_menu' => 'analytics',
@@ -111,7 +123,10 @@ class Analytics extends BaseController
     }    private function generateBasicAnalytics($artist)
     {
         // Generate basic analytics when no historical data exists
-        $startDate = strtotime($artist['tracking_start_date']);
+        $startDate = isset($artist['tracking_start_date']) && $artist['tracking_start_date'] 
+            ? strtotime($artist['tracking_start_date']) 
+            : strtotime('-7 days'); // Default to 7 days ago if no tracking start date
+            
         $days = floor((time() - $startDate) / (60 * 60 * 24));
         
         // Generate some basic chart data for the tracking period
@@ -171,7 +186,7 @@ class Analytics extends BaseController
                     ['name' => 'Bogotá', 'streams' => 9760],
                     ['name' => 'Lima', 'streams' => 8340]
                 ],
-                'country_focus' => $artist['country_code']
+                'country_focus' => $artist['country_code'] ?? 'CO'
             ],
             'platforms' => [
                 'spotify' => [
@@ -190,9 +205,16 @@ class Analytics extends BaseController
                 'avg_popularity' => round(end($popularityData)['value'])
             ],
             'tracking_info' => $artist,
-            'message' => 'Mostrando datos simulados. Para datos reales, configure las APIs en el panel de administración.'
+            'lifecycle' => [
+                'recommendations' => [
+                    'El seguimiento acaba de comenzar. Los datos se están recopilando.',
+                    'Revisa las analíticas en 24-48 horas para ver las primeras métricas.',
+                    'Considera promover tu música en redes sociales para generar tráfico inicial.'
+                ]
+            ],
+            'message' => 'Seguimiento recién creado. Mostrando datos de ejemplo mientras se recopilan métricas reales.'
         ];
-    }    /**
+    }/**
      * Crear un cron job o tarea programada para actualizar métricas diarias
      */
     public function updateDailyMetrics()

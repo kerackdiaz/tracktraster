@@ -108,12 +108,30 @@
         <?php else: ?>
           <!-- Dashboard de analíticas -->
         <div class="analytics-dashboard">
-            
-            <?php if (isset($analytics['message'])): ?>
+              <?php if (isset($analytics['message'])): ?>
             <!-- Mensaje informativo -->
-            <div class="alert alert-info mb-4">
-                <i class="fas fa-info-circle"></i>
+            <div class="alert alert-<?= strpos($analytics['message'], 'recién creado') !== false ? 'success' : 'info' ?> mb-4">
+                <i class="fas fa-<?= strpos($analytics['message'], 'recién creado') !== false ? 'check-circle' : 'info-circle' ?>"></i>
                 <?= htmlspecialchars($analytics['message']) ?>
+                
+                <?php if (strpos($analytics['message'], 'recién creado') !== false): ?>
+                <hr class="my-2">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <strong>¿Qué sigue?</strong>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <a href="<?= ($base_url ?? '/') ?>analytics/populateMetrics?populate_key=populate_metrics_2025" 
+                           class="btn btn-outline-success btn-sm"
+                           onclick="return confirm('¿Inicializar métricas ahora? Esto puede tomar unos minutos.')">
+                            <i class="fas fa-database"></i> Inicializar Métricas
+                        </a>
+                        <a href="<?= ($base_url ?? '/') ?>artists/search" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-search"></i> Agregar Otro Artista
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
             
@@ -287,18 +305,18 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <?php if ($selected_artist && $lifecycle): ?>
+            </div>        
+        <?php if ($selected_artist && ($lifecycle || $selected_artist['event_name'])): ?>
         <!-- Información del evento y progreso -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-calendar-alt"></i> 
-                    Progreso hacia el Evento
+                    <?= ($lifecycle && $lifecycle['event_name']) || $selected_artist['event_name'] ? 'Progreso hacia el Evento' : 'Información del Seguimiento' ?>
                 </h5>
             </div>
             <div class="card-body">
+                <?php if ($lifecycle): ?>
                 <div class="row">
                     <div class="col-md-8">
                         <div class="mb-3">
@@ -383,14 +401,31 @@
                                     <div><i class="fas fa-city"></i> <?= htmlspecialchars($lifecycle['event_city']) ?></div>
                                     <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
-                            </div>
+                                <?php endif; ?>                            </div>
                         </div>
                     </div>
                 </div>
+                <?php else: ?>
+                <!-- Información básica cuando no hay lifecycle disponible -->
+                <div class="alert alert-warning">
+                    <i class="fas fa-clock"></i>
+                    <strong>Seguimiento iniciado</strong><br>
+                    <?php if ($selected_artist['event_name']): ?>
+                    <strong>Evento:</strong> <?= htmlspecialchars($selected_artist['event_name']) ?><br>
+                    <?php endif; ?>
+                    <?php if ($selected_artist['event_date']): ?>
+                    <strong>Fecha del evento:</strong> <?= date('d/m/Y', strtotime($selected_artist['event_date'])) ?><br>
+                    <strong>Días restantes:</strong> <?= max(0, floor((strtotime($selected_artist['event_date']) - time()) / (60 * 60 * 24))) ?><br>
+                    <?php endif; ?>
+                    <?php if ($selected_artist['event_city']): ?>
+                    <strong>Ciudad:</strong> <?= htmlspecialchars($selected_artist['event_city']) ?><br>
+                    <?php endif; ?>
+                    <small class="text-muted">Las métricas de progreso se activarán una vez que el sistema inicialice completamente.</small>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
-        <?php endif; ?>        </div>
+        <?php endif; ?></div>
         <?php endif; ?>
         
         <?php if ($selected_artist && $lifecycle && isset($analytics['lifecycle']['recommendations'])): ?>

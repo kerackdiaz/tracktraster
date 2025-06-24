@@ -245,10 +245,10 @@ class Trackings extends BaseController
                     error_log("Error creating initial metrics for tracking $trackingId: " . $e->getMessage());
                     // No interrumpir el flujo si falla la creación de métricas
                 }
-            }
-
-            $this->session->setFlash('success', 'Seguimiento creado exitosamente para ' . $artist['name']);
-            $this->redirect('artists/view/' . $trackingData['artist_id']);
+            }            $this->session->setFlash('success', 'Seguimiento creado exitosamente para ' . $artist['name']);
+            
+            // Redirigir a Analytics con el artista seleccionado para ver los datos inmediatamente
+            $this->redirect('analytics?artist_id=' . $trackingData['artist_id']);
 
         } catch (Exception $e) {
             $this->session->setFlash('error', 'Error al crear el seguimiento: ' . $e->getMessage());
