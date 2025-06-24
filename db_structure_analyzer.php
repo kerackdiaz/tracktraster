@@ -13,7 +13,26 @@ echo "<h1>🗄️ Database Structure Analyzer</h1>";
 echo "<style>body { font-family: Arial; margin: 20px; } table { border-collapse: collapse; width: 100%; margin: 10px 0; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; } .table-name { background-color: #e7f3ff; font-weight: bold; }</style>";
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=tracktraster_db;charset=utf8mb4", 'root', '');
+    // Load environment variables from .env
+    $envFile = __DIR__ . '/.env';
+    if (file_exists($envFile)) {
+        $envVars = parse_ini_file($envFile);
+        foreach ($envVars as $key => $value) {
+            if (!isset($_ENV[$key])) {
+                $_ENV[$key] = $value;
+            }
+        }
+    }
+    
+    // Get database connection details from .env
+    $dbHost = $_ENV['DB_HOSTNAME'] ?? 'localhost';
+    $dbName = $_ENV['DB_DATABASE'] ?? 'tracktraster_db';
+    $dbUser = $_ENV['DB_USERNAME'] ?? 'root';
+    $dbPass = $_ENV['DB_PASSWORD'] ?? '';
+    
+    echo "<p><strong>Database Config:</strong> Host: $dbHost, Database: $dbName, User: $dbUser</p>";
+    
+    $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4", $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     echo "<h2>✅ Database Connected: tracktraster_db</h2>";

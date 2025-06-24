@@ -14,11 +14,24 @@ echo "<h1>🔍 Quick Tracking Debug</h1>";
 echo "<style>body { font-family: Arial; margin: 20px; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; }</style>";
 
 try {
-    // Database connection
-    $host = 'localhost';
-    $dbname = 'tracktraster_db';
-    $username = 'root';
-    $password = '';
+    // Load environment variables from .env
+    $envFile = __DIR__ . '/.env';
+    if (file_exists($envFile)) {
+        $envVars = parse_ini_file($envFile);
+        foreach ($envVars as $key => $value) {
+            if (!isset($_ENV[$key])) {
+                $_ENV[$key] = $value;
+            }
+        }
+    }
+    
+    // Get database connection details from .env
+    $host = $_ENV['DB_HOSTNAME'] ?? 'localhost';
+    $dbname = $_ENV['DB_DATABASE'] ?? 'tracktraster_db';
+    $username = $_ENV['DB_USERNAME'] ?? 'root';
+    $password = $_ENV['DB_PASSWORD'] ?? '';
+    
+    echo "<p><strong>Database Config:</strong> Host: $host, Database: $dbname, User: $username</p>";
     
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

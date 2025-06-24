@@ -23,7 +23,26 @@ pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; 
 </style>";
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=tracktraster_db;charset=utf8mb4", 'root', '');
+    // Load environment variables from .env
+    $envFile = __DIR__ . '/.env';
+    if (file_exists($envFile)) {
+        $envVars = parse_ini_file($envFile);
+        foreach ($envVars as $key => $value) {
+            if (!isset($_ENV[$key])) {
+                $_ENV[$key] = $value;
+            }
+        }
+    }
+    
+    // Get database connection details from .env
+    $dbHost = $_ENV['DB_HOSTNAME'] ?? 'localhost';
+    $dbName = $_ENV['DB_DATABASE'] ?? 'tracktraster_db';
+    $dbUser = $_ENV['DB_USERNAME'] ?? 'root';
+    $dbPass = $_ENV['DB_PASSWORD'] ?? '';
+    
+    echo "<p><strong>Database Config:</strong> Host: $dbHost, Database: $dbName, User: $dbUser</p>";
+    
+    $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4", $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     echo "<div class='step'><h2>📊 STEP 1: Current Database State</h2></div>";
